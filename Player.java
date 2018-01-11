@@ -49,14 +49,20 @@ public class Player {
 
         // Getting the teams for both. Used in some of the given methods
         // Seems like a dumb way to do it, but here we are.
-        /*
+
         ally_team = gc.team();
         if (ally_team.equals(Team.Red)) {
             enemy_team = Team.Blue;
         } else {
             enemy_team = Team.Red;
-        }*/
+        }
 
+        //TODO: Create an array at the start to find all locations w/ kryptonite
+        //PlanetMap map = gc.startingMap(Planet.Earth);
+
+
+        //TODO: getting init location of enemy
+        // Use: bc_PlanetMap_initial_units_get
 
         while (true) {
             //System.out.println("Current round: "+gc.round());
@@ -65,16 +71,21 @@ public class Player {
 
             try {
 
-                for (int i = 0; i < units.size(); i++) {
-                    Unit unit = units.get(i);
 
-                    // if the unit is garrisoned or in a rocket. Wait to be unloaded
-                    if (unit.location().isInGarrison()) {
+                for (int i = 0; i < units.size(); i++) {
+
+                    // Defining stuff now
+                    Unit unit = units.get(i);
+                    int id = unit.id();
+                    Location unit_loc = unit.location();
+
+
+                    // if the unit is garrisoned or in a rocket. Do nothing.
+                    if (unit_loc.isInGarrison() && unit.unitType()!=UnitType.Factory) {
                         continue;
                     }
-
-                    int id = unit.id(); // reducing the amount of times I have to call this silly function
-
+                    MapLocation unit_maploc = unit_loc.mapLocation();
+                    boolean unit_finished = false;
                     // this is actually filthy atm:
 
                     // getting the type of unit:
@@ -85,9 +96,11 @@ public class Player {
                             if ((unit.structureGarrison()).size() > 0 ) {
                                 unit.structureGarrison().get(0);
 
-                                //TODO: unload in a random direction so that a blockage won't stop me unloading
-                                if (gc.canUnload(id, Direction.North)) {
-                                    gc.unload(id, Direction.North);
+                                // unloads in a random direction
+                                //TODO: Prioritise towards the enemy
+                                Direction dir = getRandomDir();
+                                if (gc.canUnload(id, dir)) {
+                                    gc.unload(id, dir);
                                 }
                             }
 
@@ -119,25 +132,34 @@ public class Player {
                             replicate(unit, gc);
 
                             // 2.If can repair/build right next to me, do that
-                            VecUnit nearby = gc.senseNearbyUnits(unit.location().mapLocation(), 2);
-                            for (int j=0; j<nearby.size(); j++) {
-                                Unit other = nearby.get(j);
 
-                                // Checks if something repairable is next to the worker
-                                if (gc.canBuild(id, other.id())) {
-                                    gc.build(id, other.id());
+                            VecUnit nearby;
+                            if ((nearby = gc.senseNearbyUnits(unit.location().mapLocation(), 2)).size() > 0) {
+                                for (int j=0; j<nearby.size(); j++) {
+                                    Unit other = nearby.get(j);
+
+                                    // Checks if something repairable is next to the worker
+                                    if (gc.canBuild(id, other.id())) {
+                                        gc.build(id, other.id());
+                                        unit_finished = true;
+                                        break;
+                                    }
                                 }
                             }
 
-                            // 3. Checks if I should build something
-                            if (curr_factories < req_factories) {
+                            // eww
+                            if (unit_finished) {
+                                continue;
+                            }
+                            if (curr_factories < req_factories){
+                                // 3. Checks if I should build something
 
                                 // Yes I should build a factory some where.
                                 // TODO making sure that I choose a good factory spot
                                     // where does not block friendly units, not on minerals
 
                                 for (Direction dir : Direction.values()) {
-                                    //TODO: Don't place on ores? Could be an edge case here
+                                    //TODO: Don't place on ores?
                                     System.out.println("Looking for a place to put the factory");
                                     if (gc.canBlueprint(id, UnitType.Factory, dir)) {
 
@@ -150,11 +172,17 @@ public class Player {
                                     }
 
                                 }
-                            }
-                            //TODO: mining. These should
+                                // if got here, couldn't find a spot to build factory
+                                //TODO find a spot where I can build a factory
 
+                                wander(unit);
+                            } else {
+                                // For some good ol harvesting
 
-                            //TODO: MOVE
+                                //goMine(id, unit_maploc);
+
+                        }
+
                             break;
 
                         default:
@@ -172,7 +200,8 @@ public class Player {
                             VecUnit enemies;
 
                             // Checks if I can see any enemies
-                            if ((enemies = gc.senseNearbyUnitsByTeam(curr_loc, unit.visionRange(), enemy_team))!= null) {
+                            //System.out.println(gc.senseNearbyUnitsByTeam(curr_loc, unit.visionRange(), enemy_team).toString());
+                            if ((enemies = gc.senseNearbyUnitsByTeam(curr_loc, unit.visionRange(), enemy_team)).size() > 0) {
 
                                 // chooses the first enemy arbitrarily. Should be sorted at some point
                                 Unit enemy = enemies.get(0);
@@ -182,7 +211,7 @@ public class Player {
                                 if (curr_loc.distanceSquaredTo(enemy_loc) >= unit.attackRange()) {
 
                                     Direction enemy_dir = curr_loc.directionTo(enemy_loc);
-                                    if (gc.canMove(id, enemy_dir)) {
+                                    if (gc.isMoveReady(id) && gc.canMove(id, enemy_dir) ) {
                                         gc.moveRobot(id, enemy_dir);
                                     }
                                 }
@@ -192,7 +221,7 @@ public class Player {
                                     gc.attack(id, enemy.id());
                                 }
                             } else {
-                                wander(id);
+                                wander(unit);
 
                             }
                             break;
@@ -208,15 +237,64 @@ public class Player {
         }
     }
 
-    private static void wander(int id) {
-        int NUM_TRIES = 20;
-        // just wander I guess. Which sounds pretty shit tbh
-        for (int k=0; k<NUM_TRIES; k++) {
-            Direction dir = getRandomDir();
-            if (gc.canMove(id, dir)) {
-                gc.moveRobot(id, dir);
+    private static void goMine(int id, MapLocation unit_maploc) {
+
+        boolean has_harvested = false;
+        VecMapLocation possible_locs = gc.allLocationsWithin(unit_maploc,2 );
+        for (int j=0; j<possible_locs.size(); j++) {
+            Direction candidate_dir = unit_maploc.directionTo(possible_locs.get(j));
+            if (gc.canHarvest(id, candidate_dir)) {
+                gc.harvest(id, candidate_dir);
+                has_harvested = true;
+                break;
             }
         }
+
+        //TODO: move towards other karbonite rather than just wander
+        if (!has_harvested) {
+            // fix
+            wander(gc.unit(id));
+        }
+    }
+
+    //private static void wander(int id) {
+    private static void wander(Unit unit) {
+
+        System.out.println("Attempting to wander");
+        if (unit.movementCooldown() < 10) {
+        //dont think is move ready is working
+        //if (gc.isMoveReady(id)) {
+            int NUM_TRIES = 10;
+            // just wander I guess. Which sounds pretty shit tbh
+
+            for (int k=0; k<NUM_TRIES; k++) {
+                Direction dir = getRandomDir();
+                if (gc.canMove(unit.id(), dir)) {
+                    gc.moveRobot(unit.id(), dir);
+                }
+            }
+        }
+
+    }
+
+
+    private static void wander(int id) {
+
+        System.out.println("Attempting to wander");
+        if (gc.isMoveReady(id)) {
+            //dont think is move ready is working
+            //if (gc.isMoveReady(id)) {
+            int NUM_TRIES = 10;
+            // just wander I guess. Which sounds pretty shit tbh
+
+            for (int k=0; k<NUM_TRIES; k++) {
+                Direction dir = getRandomDir();
+                if (gc.canMove(id, dir)) {
+                    gc.moveRobot(id, dir);
+                }
+            }
+        }
+
     }
 
 
