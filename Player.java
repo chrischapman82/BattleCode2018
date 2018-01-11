@@ -60,9 +60,9 @@ public class Player {
         //TODO: Create an array at the start to find all locations w/ kryptonite
         //PlanetMap map = gc.startingMap(Planet.Earth);
 
-
         //TODO: getting init location of enemy
         // Use: bc_PlanetMap_initial_units_get
+
 
         while (true) {
             //System.out.println("Current round: "+gc.round());
@@ -70,8 +70,6 @@ public class Player {
             VecUnit units = gc.myUnits();
 
             try {
-
-
                 for (int i = 0; i < units.size(); i++) {
 
                     // Defining stuff now
@@ -84,6 +82,7 @@ public class Player {
                     if (unit_loc.isInGarrison() && unit.unitType()!=UnitType.Factory) {
                         continue;
                     }
+
                     MapLocation unit_maploc = unit_loc.mapLocation();
                     boolean unit_finished = false;
                     // this is actually filthy atm:
@@ -92,15 +91,19 @@ public class Player {
                     // At some point I want to separate units into classes
                     switch (unit.unitType()) {
                         case Factory:
+                            System.out.println("I am a factory");
                             //if there are any units in the garrison, unload them
                             if ((unit.structureGarrison()).size() > 0 ) {
+                                System.out.println("I have garrisoned units");
                                 unit.structureGarrison().get(0);
 
                                 // unloads in a random direction
                                 //TODO: Prioritise towards the enemy
+                                //TODO: Should check all exits
                                 Direction dir = getRandomDir();
                                 if (gc.canUnload(id, dir)) {
                                     gc.unload(id, dir);
+                                    System.out.println("Unloading units");
                                 }
                             }
 
@@ -134,23 +137,16 @@ public class Player {
                             // 2.If can repair/build right next to me, do that
 
                             VecUnit nearby;
-                            if ((nearby = gc.senseNearbyUnits(unit.location().mapLocation(), 2)).size() > 0) {
-                                for (int j=0; j<nearby.size(); j++) {
-                                    Unit other = nearby.get(j);
 
-                                    // Checks if something repairable is next to the worker
-                                    if (gc.canBuild(id, other.id())) {
-                                        gc.build(id, other.id());
-                                        unit_finished = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // eww
-                            if (unit_finished) {
+                            // such a filthy way to do this
+                            // Checks if there's anything nearby that it can build. If it builds a factory, exits the loop
+                            if ((gc.senseNearbyUnits(unit.location().mapLocation(), 2)).size() > 0
+                                                                && buildNearbyStructs(unit)) {
+                                // means that it doesn't move away
                                 continue;
                             }
+
+                            // 3. Checks if I should build a factory
                             if (curr_factories < req_factories){
                                 // 3. Checks if I should build something
 
@@ -175,26 +171,25 @@ public class Player {
                                 // if got here, couldn't find a spot to build factory
                                 //TODO find a spot where I can build a factory
 
-                                wander(unit);
+                                wander(id);
                             } else {
                                 // For some good ol harvesting
 
-                                //goMine(id, unit_maploc);
-
-                        }
+                                goMine(id, unit_maploc);
+                                //wander(id);
+                            }
 
                             break;
 
                         default:
-
-
+                            System.out.println("I am a soldier");
 
                             /*  1. If can see an enemy, engage them
                                     If not in atk range, move towards them
                                     If possible, atk enemy
                                 2. else just move towards where every one else is going
                              */
-
+                            //wander(id);
                             // by default, if you see an enemy, attack them
                             MapLocation curr_loc = unit.location().mapLocation();
                             VecUnit enemies;
@@ -202,7 +197,7 @@ public class Player {
                             // Checks if I can see any enemies
                             //System.out.println(gc.senseNearbyUnitsByTeam(curr_loc, unit.visionRange(), enemy_team).toString());
                             if ((enemies = gc.senseNearbyUnitsByTeam(curr_loc, unit.visionRange(), enemy_team)).size() > 0) {
-
+                                System.out.println("I have spotted an enemy");
                                 // chooses the first enemy arbitrarily. Should be sorted at some point
                                 Unit enemy = enemies.get(0);
                                 MapLocation enemy_loc = enemy.location().mapLocation();
@@ -221,7 +216,7 @@ public class Player {
                                     gc.attack(id, enemy.id());
                                 }
                             } else {
-                                wander(unit);
+                                wander(id);
 
                             }
                             break;
@@ -235,6 +230,24 @@ public class Player {
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }
+    }
+
+    // builds a factory. Returns true if a factory was built, else returns false.
+    private static boolean buildNearbyStructs(Unit unit) {
+
+        VecUnit nearby = gc.senseNearbyUnits(unit.location().mapLocation(), 2);
+        for (int j=0; j<nearby.size(); j++) {
+            Unit other = nearby.get(j);
+
+            // Checks if something repairable is next to the worker
+            if (gc.canBuild(unit.id(), other.id())) {
+                gc.build(unit.id(), other.id());
+                //unit_finished = true;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void goMine(int id, MapLocation unit_maploc) {
@@ -253,31 +266,13 @@ public class Player {
         //TODO: move towards other karbonite rather than just wander
         if (!has_harvested) {
             // fix
-            wander(gc.unit(id));
+            wander(id);
         }
     }
 
-    //private static void wander(int id) {
-    private static void wander(Unit unit) {
 
-        System.out.println("Attempting to wander");
-        if (unit.movementCooldown() < 10) {
-        //dont think is move ready is working
-        //if (gc.isMoveReady(id)) {
-            int NUM_TRIES = 10;
-            // just wander I guess. Which sounds pretty shit tbh
-
-            for (int k=0; k<NUM_TRIES; k++) {
-                Direction dir = getRandomDir();
-                if (gc.canMove(unit.id(), dir)) {
-                    gc.moveRobot(unit.id(), dir);
-                }
-            }
-        }
-
-    }
-
-
+    //TODO: Wander goes in a certain order. This is bad.
+    // SHould just be random
     private static void wander(int id) {
 
         System.out.println("Attempting to wander");
@@ -286,11 +281,16 @@ public class Player {
             //if (gc.isMoveReady(id)) {
             int NUM_TRIES = 10;
             // just wander I guess. Which sounds pretty shit tbh
+            System.out.println("I am allowed to wander");
 
-            for (int k=0; k<NUM_TRIES; k++) {
-                Direction dir = getRandomDir();
+            Direction[] dirs = Direction.values();
+            for (int k=0; k<Direction.values().length; k++) {
+                Direction dir = dirs[k];
+                // System.out.format("%s\n", dir);
                 if (gc.canMove(id, dir)) {
                     gc.moveRobot(id, dir);
+                    System.out.println("Wandering");
+                    break;
                 }
             }
         }
@@ -319,7 +319,8 @@ public class Player {
     // gets a random direction
     public static Direction getRandomDir() {
         // fairly sure this isn't random. In fact it's super unlikely to be the last value
-        int rand = (int)(Math.random()*(Direction.values().length));
+        int rand = (int)(Math.random()*Direction.values().length);
+        System.out.format("rand = %d, len = %d\n", rand, Direction.values().length);
         return Direction.values()[rand];
     }
 
