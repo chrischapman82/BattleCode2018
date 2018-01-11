@@ -61,70 +61,26 @@ public class Player {
 
 
                     // if the unit is garrisoned or in a rocket. Do nothing.
-                    if (unit_loc.isInGarrison() && unit.unitType()!=UnitType.Factory) {
+                    if (unit_loc.isInGarrison() && !unit.unitType().equals(UnitType.Factory)) {
+                        System.out.println("Is garrisoned, do nothing");
                         continue;
                     }
 
-                    MapLocation unit_maploc = unit_loc.mapLocation();
-                    // this is actually filthy atm:
+                    // Getting the type of unit:
+                    UnitType unit_type = unit.unitType();
 
-                    // getting the type of unit:
-                    // At some point I want to separate units into classes
-                    switch (unit.unitType()) {
-                        case Factory:
-                            //if there are any units in the garrison, unload them
-                            if ((unit.structureGarrison()).size() > 0 ) {
-                                System.out.println("I have garrisoned units");
-                                unit.structureGarrison().get(0);
+                    // switch was being real dodgy so I guess if statements it is
+                    // Going through all the unit types
+                    if (unit_type.equals(UnitType.Factory)) {
 
-                                // unloads in a random direction
-                                //TODO: Prioritise towards the enemy
-                                //TODO: Should check all exits
+                        StructFactory.update(unit);
 
-                                Direction candidate_dir = getRandomDir();
-                                for (int j = 0; j < Globals.NUM_DIRECTIONS; j++) {
-                                    candidate_dir = bc.bcDirectionRotateLeft(candidate_dir);
-                                    if (gc.canUnload(id, candidate_dir)) {
-                                        gc.unload(id, candidate_dir);
-                                        System.out.println("unloading...");
-                                        break;
-                                    }
-                                }
-
-                            }
-
-                            //Produce a unit if it's possible
-                            //Have to check if a factory can unload a unit and build a unit in the same turn
-                            if ((gc.canProduceRobot(id, UnitType.Knight))) {
-                                gc.produceRobot(id, UnitType.Knight);
-                                System.out.println("Producing Knight");
-                            }
-                            break;
-
-                        // case for the worker
-                        case Worker:
-                            //((BotWorker)unit).update();
-                            BotWorker.update(unit);
-
-                            break;
-
-                        default:
-
-                            /*  1. If can see an enemy, engage them
-                                    If not in atk range, move towards them
-                                    If possible, atk enemy
-                                2. else just move towards where every one else is going
-                             */
-                            //wander(id);
-                            // by default, if you see an enemy, attack them
-                            MapLocation curr_loc = unit.location().mapLocation();
-                            VecUnit enemies;
-
-                            BotKnight.update(unit);
-
-                            }
-                            break;
+                    } else if (unit_type.equals(UnitType.Worker)) {
+                        BotWorker.update(unit);
+                    } else {
+                        BotKnight.update(unit);
                     }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -144,4 +100,5 @@ public class Player {
         System.out.println();
         return Direction.values()[rand];
     }
+
 }

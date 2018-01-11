@@ -86,9 +86,8 @@ public class Nav {
         Direction dir_to_loc = dirToMapLoc(unit, map_loc);
 
         // TODO: do something if you can't move int hat direction
-        return tryMoveInDirection(id, dir_to_loc);
+        return tryHardMoveInDirection(id, dir_to_loc);
     }
-
 
 
 

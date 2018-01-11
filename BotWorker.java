@@ -18,6 +18,8 @@ public class BotWorker extends Bot{
 
         int id = unit.id();
 
+       // Nav.wander(id);
+
         // 1. Checks if any nearby blueprints should be built
         if (tryToBuild(unit)) {
             System.out.println("Building...");
@@ -46,6 +48,7 @@ public class BotWorker extends Bot{
 
         // TODO: Find Karbonite
         findKarbonite(id);
+        return;
     }
 
     // TODO: Find Karbonite, rather than just wandering w/out purpose
