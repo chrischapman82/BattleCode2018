@@ -3,8 +3,80 @@ import bc.*;
 public class Nav {
 
 
+    // i hate this location maplocation bs
+    public static boolean moveTo(int id, MapLocation loc) {
+        return moveTo(id, Player.gc.unit(id).location().mapLocation().directionTo(loc));
+    }
+
+
+    public static boolean moveTo(int id, Direction dir) {
+
+        // try moving normally
+        if (tryMoveInDirection(id, dir)) {
+            return true;
+        }
+        Unit friend;
+        // if friendly unit is in our way, ask them to please move
+        if ((friend = Player.gc.senseUnitAtLocation(Player.gc.unit(id).location().mapLocation().add(dir))).team().equals(Globals.us)) {
+            if (politelyAskToMove(friend, dir)) {
+                moveTo(id, dir);
+            }
+        }
+        return false;
+    }
+
+    // Tells a unit to please move.
+    // The unit knows which way it's being pushed
+    public static boolean politelyAskToMove(Unit unit, Direction dir) {
+
+        if (tryMakeWay(unit.id(), dir)) {
+            return true;
+        }
+        return false;
+    }
+
+    // tries to make way for a friend.
+    // Prioritises moving to the side rather than forward
+    public static boolean tryMakeWay(int id, Direction dir) {
+
+        if (Player.gc.unit(id).movementHeat() >= 10) {
+            return false;
+        }
+
+        // try going left
+        if (tryMoveForward(id, bc.bcDirectionRotateLeft((bc.bcDirectionRotateLeft(dir))))) {
+            return true;
+        }
+
+        // try going right
+        if (tryMoveForward(id, bc.bcDirectionRotateRight((bc.bcDirectionRotateRight(dir))))) {
+            return true;
+        }
+
+        // try going left-centre
+        if (tryMoveForward(id, bc.bcDirectionRotateLeft(dir))) {
+            return true;
+        }
+
+        // try going right-centre
+        if (tryMoveForward(id, bc.bcDirectionRotateRight(dir))) {
+            return true;
+        }
+
+        // try going forward
+        if (tryMoveForward(id, dir)) {
+            return true;
+        }
+
+        return false;
+    }
+
     // Moves in the given direction, or @ a 45deg angle
     public static boolean tryMoveInDirection(int id, Direction dir){
+
+        if (Player.gc.unit(id).movementHeat() >= 10) {
+            return false;
+        }
 
         if (Player.gc.canMove(id, dir)) {
             Player.gc.moveRobot(id, dir);
@@ -13,18 +85,15 @@ public class Nav {
 
         // try going left
         dir = bc.bcDirectionRotateLeft(dir);
-        if (Player.gc.canMove(id, bc.bcDirectionRotateLeft(dir))) {
-            Player.gc.moveRobot(id, dir);
+        if (tryMoveForward(id, dir)) {
             return true;
         }
 
         // try going right
         dir = bc.bcDirectionRotateRight(dir);
-        if (Player.gc.canMove(id, dir)) {
-            Player.gc.moveRobot(id, dir);
+        if (tryMoveForward(id, dir)) {
             return true;
         }
-
 
         return false;
     }
@@ -149,6 +218,11 @@ public class Nav {
             }
         }
 
+    }
+
+    // this has been frustrating af
+    public static MapLocation getMapLocFromId(int id) {
+        return Player.gc.unit(id).location().mapLocation();
     }
 
 }

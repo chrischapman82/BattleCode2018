@@ -12,7 +12,7 @@ public class Globals {
 
     // storing some mapLocations
     public static MapLocation enemy_init_loc;
-    public static PlanetMap earth_init;
+    public static PlanetMap earth;
 
 
     public static int req_factories = 2;  // I want one as soon as ossible
@@ -20,6 +20,11 @@ public class Globals {
     public static int NUM_DIRECTIONS = 8;
     public static int INITIAL_CAPACITY = 11;    // TODO: Should be able to know what the max cap is
 
+
+    // map dimensions:
+    public static int earth_width;
+    public static int earth_height;
+    public static int earth_size;
 
     public static int num_workers;
     public static int num_factories;
@@ -30,6 +35,8 @@ public class Globals {
 
     public static boolean need_workers = false;
     public static boolean needFactory = false;
+
+    public static ArrayList<Boolean> initKarboniteSpots;
 
     public static int curr_factories = 0;       //TODO: This should be changed to needFactory to work at some point
 
@@ -44,9 +51,24 @@ public class Globals {
             them = Team.Red;
         }
 
-        earth_init = Player.gc.startingMap(Planet.Earth);
-        //System.out.println(earth_init.getInitial_units().toString());
+        earth = Player.gc.startingMap(Planet.Earth);
+        //earth.initialKarboniteAt();
+
+        earth_height = (int)earth.getHeight();
+        earth_width = (int)earth.getWidth();
+        earth_size = earth_height*earth_width;
+
         enemy_init_loc = findInitEnemyLoc();
+
+
+        // will have O(1) lookup this way.
+        for (int i=0; i<earth_size; i++) {
+            if ((earth.initialKarboniteAt(new MapLocation(Planet.Earth, i%earth_width,i*earth_width))) == 1) {
+                initKarboniteSpots.add(true);
+            } else {
+                initKarboniteSpots.add(false);
+            }
+        }
     }
 
 
@@ -56,7 +78,7 @@ public class Globals {
 
         //Player.gc.myUnits().get(0).location().mapLocation();
 
-        VecUnit all_units = earth_init.getInitial_units();
+        VecUnit all_units = earth.getInitial_units();
         for (int i=0; i< all_units.size(); i++) {
             Unit curr_unit = all_units.get(i);
             if (curr_unit.team().equals(them)) {

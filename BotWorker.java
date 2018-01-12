@@ -58,7 +58,32 @@ public class BotWorker extends Bot{
     }
 
     // TODO: Find Karbonite, rather than just wandering w/out purpose
+    // Only valid on Earth
     public static void findKarbonite(int id) {
+        /*MapLocation loc = unit.location().mapLocation();
+        // update if there's no karbonite
+        int x = loc.getX();
+        int y = loc.getY();
+        int index = Tile.getIndex(x,y);
+
+        int num_reps=0;
+        while (num_reps < 10 && index < Globals.earth_size) {
+
+            //TODO LUL
+            index = Tile.increaseX(index);
+            if (Globals.initKarboniteSpots.get(index)) {
+                if ((Player.gc.karboniteAt(Tile.getMapLocation(index)) == 0)) {
+                    Nav.moveTo(unit.id(), loc);
+                    break;
+
+                // otherwise update the current map
+                } else {
+                    Globals.initKarboniteSpots.set(index,false);
+                }
+            }
+            num_reps++;
+        }*/
+
         Nav.wander(id);
     }
 
@@ -148,6 +173,10 @@ public class BotWorker extends Bot{
             if (Player.gc.canHarvest(id, candidate_dir)) {
                 Player.gc.harvest(id, candidate_dir);
                 System.out.println("Mining...");
+
+
+                // remove the spot from the map
+                Globals.initKarboniteSpots.set(Tile.getIndex(Nav.getMapLocFromId(id).add(candidate_dir)),false);
                 return true;
             }
         }

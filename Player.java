@@ -40,7 +40,7 @@ public class Player {
         Research.init();
 
         System.out.format("Enemy at: %s", Globals.enemy_init_loc.toString());
-        System.out.println(Globals.earth_init.isPassableTerrainAt(new MapLocation(Planet.Earth,0,0)));
+        System.out.println(Globals.earth.isPassableTerrainAt(new MapLocation(Planet.Earth,0,0)));
         // Direction is a normal java enum.
         Direction[] directions = Direction.values();
 
