@@ -26,8 +26,6 @@ public class BotWorker extends Bot{
             return;
         }
 
-        //System.out.println(Player.gc.karbonite() < 15 || unit.abilityCooldown() >= 10);
-        //System.out.println(Player.gc.karbonite() < 15);
         //System.out.println(unit.abilityCooldown() >= 10);
         //System.out.println(unit.abilityCooldown());
         // 2. If can replicate. Do that.
@@ -176,7 +174,7 @@ public class BotWorker extends Bot{
 
 
                 // remove the spot from the map
-                Globals.initKarboniteSpots.set(Tile.getIndex(Nav.getMapLocFromId(id).add(candidate_dir)),false);
+                //Globals.initKarboniteSpots.set(Tile.getIndex(Nav.getMapLocFromId(id).add(candidate_dir)),false);
                 return true;
             }
         }
