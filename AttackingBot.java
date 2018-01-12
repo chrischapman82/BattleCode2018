@@ -8,8 +8,8 @@ public class AttackingBot extends Bot{
         // general vars
         int id = unit.id();
         MapLocation curr_loc = unit.location().mapLocation();
-        VecUnit attackable_enemies = Player.gc.senseNearbyUnitsByTeam(curr_loc, unit.attackRange(), Globals.them);
-        VecUnit viewable_enemies = Player.gc.senseNearbyUnitsByTeam(curr_loc, unit.visionRange(), Globals.them);
+        VecUnit attackable_enemies = getAttackableEnemies(unit);
+        VecUnit viewable_enemies = getViewableEnemies(unit);
 
         Unit enemy;
         int enemy_id;

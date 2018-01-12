@@ -31,8 +31,9 @@ public class Nav {
         }
 
         Unit friend;
-        // if friendly unit is in our way, ask them to please move
-        if ((friend = Player.gc.senseUnitAtLocation(Player.gc.unit(id).location().mapLocation().add(dir))).team().equals(Globals.us)) {
+        // if friendly unit is in our way, politely ask them to move
+
+        if ((friend = Player.gc.senseUnitAtLocation(getMapLocFromId(id).add(dir))).team().equals(Globals.us)) {
             if (politelyAskToMove(friend, dir)) {
                 moveTo(id, dir);
             }
@@ -42,9 +43,9 @@ public class Nav {
 
     // Tells a unit to please move.
     // The unit knows which way it's being pushed
-    public static boolean politelyAskToMove(Unit unit, Direction dir) {
+    public static boolean politelyAskToMove(Unit ally_unit, Direction dir) {
 
-        if (tryMakeWay(unit.id(), dir)) {
+        if (tryMakeWay(ally_unit.id(), dir)) {
             return true;
         }
         return false;

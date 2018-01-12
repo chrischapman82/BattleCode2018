@@ -76,6 +76,8 @@ public class Player {
 
                     // Defining stuff now
                     Unit unit = units.get(i);
+                    //unit = (BotHealer)unit;
+                    System.out.println(unit.id());
                     //System.out.format("%s reporting in\n", unit.unitType());
                     int id = unit.id();
                     Location unit_loc = unit.location();

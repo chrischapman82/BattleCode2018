@@ -30,7 +30,6 @@ public class BotWorker extends Bot{
         //System.out.println(unit.abilityCooldown());
         // 2. If can replicate. Do that.
         if (tryToReplicate(unit)) {
-            //System.out.println("Replicating...");
             return;
         }
 
@@ -84,6 +83,7 @@ public class BotWorker extends Bot{
 
         Nav.wander(id);
     }
+    //TODO: worker run code
 
     public static boolean tryToBlueprintFactory(int id) {
         // TODO making sure that I choose a good factory spot
@@ -139,7 +139,7 @@ public class BotWorker extends Bot{
     public static boolean tryToBuild(Unit unit) {
 
         // checks right next to the player
-        VecUnit nearby = Player.gc.senseNearbyUnits(unit.location().mapLocation(), 2);
+        VecUnit nearby = Player.gc.senseNearbyUnits(unit.location().mapLocation(), 5);
 
         // nothing nearby. Exit
         if (nearby.size() == 0) {

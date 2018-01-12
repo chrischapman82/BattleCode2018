@@ -19,7 +19,6 @@ public class Pathing {
         FREE, FOLLOW, ARRIVAL
     }
 
-
     public void bugPath(MapLocation start, MapLocation dest) {
 
 
