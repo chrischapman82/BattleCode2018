@@ -15,6 +15,7 @@ public class Nav {
         if (tryMoveInDirection(id, dir)) {
             return true;
         }
+
         Unit friend;
         // if friendly unit is in our way, ask them to please move
         if ((friend = Player.gc.senseUnitAtLocation(Player.gc.unit(id).location().mapLocation().add(dir))).team().equals(Globals.us)) {

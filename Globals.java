@@ -40,6 +40,7 @@ public class Globals {
 
     public static int curr_factories = 0;       //TODO: This should be changed to needFactory to work at some point
 
+    public static ArrayList<Unit> priorityEnemies;
 
     public static void init() {
 
@@ -59,19 +60,17 @@ public class Globals {
         earth_size = earth_height*earth_width;
 
         enemy_init_loc = findInitEnemyLoc();
-
+        priorityEnemies = new ArrayList<>();
 
         // will have O(1) lookup this way.
-        for (int i=0; i<earth_size; i++) {
+        /*for (int i=0; i<earth_size; i++) {
             if ((earth.initialKarboniteAt(new MapLocation(Planet.Earth, i%earth_width,i*earth_width))) == 1) {
                 initKarboniteSpots.add(true);
             } else {
                 initKarboniteSpots.add(false);
             }
-        }
+        }*/
     }
-
-
 
     // finds an initial location to go to.
     public static MapLocation findInitEnemyLoc() {
@@ -130,6 +129,26 @@ public class Globals {
         } else {
             need_workers = false;
         }
+    }
+
+    public static boolean addPriorityEnemy(Unit enemy) {
+        priorityEnemies.add(enemy);
+        return true;
+    }
+
+    public static boolean priorityEnemyContains(Unit enemy) {
+        if (priorityEnemies.contains(enemy)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean killEnemyUnit(Unit enemy) {
+        if (priorityEnemies.contains(enemy)) {
+            priorityEnemies.remove(enemy);
+            return true;
+        }
+        return false;
     }
 
 }

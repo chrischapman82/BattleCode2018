@@ -94,8 +94,10 @@ public class Player {
                     } else if (unit_type.equals(UnitType.Worker)) {
                         BotWorker.update(unit);
 
-                    } else {
+                    } else if (unit_type.equals(UnitType.Knight)){
                         BotKnight.update(unit);
+                    } else {
+                        BotRanger.update(unit);
                     }
                 }
 

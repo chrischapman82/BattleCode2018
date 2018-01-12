@@ -4,7 +4,48 @@ import bc.*;
 public class AttackingBot extends Bot{
 
     public static void update(Unit unit) {
-        basicAttack(unit.id());
+
+        // general vars
+        int id = unit.id();
+        MapLocation curr_loc = unit.location().mapLocation();
+        VecUnit attackable_enemies = Player.gc.senseNearbyUnitsByTeam(curr_loc, unit.attackRange(), Globals.them);
+        VecUnit viewable_enemies = Player.gc.senseNearbyUnitsByTeam(curr_loc, unit.visionRange(), Globals.them);
+
+        Unit enemy;
+        int enemy_id;
+
+        // If any in range, just attack them.
+        if ((attackable_enemies.size() > 0)) {
+            enemy = chooseLowestHpEnemy(attackable_enemies);
+            enemy_id = enemy.id();
+            tryAttack(id, enemy_id);
+
+            // if low hp, run after attacking.
+            if (unit.unitType()== UnitType.Ranger && unit.health() < BotRanger.LOW_HP) {
+                Nav.moveTo(id, unit.location().mapLocation().directionTo(enemy.location().mapLocation()));
+            }
+            return;
+
+            // if I can see enemies but not in range, try and get close enough to attack
+        }
+
+        // should be part of the ranger code at some point
+
+        if ((viewable_enemies.size() > 0)) {
+            enemy = chooseClosestEnemy(unit, viewable_enemies);
+
+            // if you're a ranger, sit a second
+            if (unit.unitType()== UnitType.Ranger && unit.health() < BotRanger.LOW_HP && unit.attackHeat()>=10) {
+                return;
+            }
+            Nav.tryGoToMapLocation(id, enemy.location().mapLocation());
+            tryAttack(id, enemy.id());
+            return;
+
+        } else {
+            Nav.moveToEnemyBase(id);
+        }
+        return;
     }
 
     // tries to attack an enemy
@@ -12,36 +53,25 @@ public class AttackingBot extends Bot{
 
         if (Player.gc.isAttackReady(id) && Player.gc.canAttack(id, enemy_id)) {
             // can I attack them?
+
             Player.gc.attack(id, enemy_id);
+            checkIfEnemyKilled(Player.gc.unit(id), Player.gc.unit(enemy_id));
             return true;
         }
         return false;
     }
 
+    // checks if the attack will kill the enemy
+    public static boolean checkIfEnemyKilled(Unit unit, Unit enemy) {
 
-    // returns true if we attacked
-    // doesn't take moving into account
-    public static boolean basicAttack(int id) {
-
-        Unit unit = Player.gc.unit(id);
-        MapLocation curr_loc = unit.location().mapLocation();
-        VecUnit attackable_enemies;
-        VecUnit viewable_enemies;
-
-        // If any in range, just attack them.
-        if ((attackable_enemies = Player.gc.senseNearbyUnitsByTeam(curr_loc, unit.attackRange(), Globals.them)).size() > 0) {
-            return tryAttack(id, chooseLowestHpEnemy(attackable_enemies).id());
-
-            // if I can see enemies but not in range, try and get close enough to attack
-        } else if ((viewable_enemies = Player.gc.senseNearbyUnitsByTeam(curr_loc, unit.visionRange(), Globals.them)).size() > 0) {
-
-            // currently going towards the closest enemy
-            Unit enemy = chooseClosestEnemy(unit, viewable_enemies);
-            Nav.tryGoToMapLocation(id, enemy.location().mapLocation());
-            return tryAttack(id, enemy.id());
-
-        } else {
-            Nav.moveToEnemyBase(id);
+        long armour = 0;
+        if (enemy.unitType().equals(UnitType.Knight)) {
+            armour = enemy.knightDefense();
+        }
+        if (unit.damage() > (enemy.health() - armour)) {
+            // they dead
+            Globals.killEnemyUnit(enemy);
+            return true;
         }
         return false;
     }
@@ -49,8 +79,23 @@ public class AttackingBot extends Bot{
 
 
     /* Choosing certain enemies
-
      */
+
+    // checks for priority enemies that have been marked
+    // will return null if no priority enemies are there
+    public static Unit choosePriorityEnemy(Unit unit, VecUnit enemies) {
+
+        Unit enemy;
+        for (int i=0; i<enemies.size(); i++) {
+            enemy = enemies.get(i);
+            if (Globals.priorityEnemies.contains(enemy)) {
+                return enemy;
+            }
+        }
+        return null;
+    }
+
+
     // Assumes that enemies is not null.
     // Basically just a find max fn
     public static Unit chooseLowestHpEnemy(VecUnit enemies) {

@@ -12,6 +12,12 @@ public class Bot extends Unit {
     }
 
 
+    // marks the enemy for death
+    public static boolean markUnit(Unit unit) {
+        Globals.priorityEnemies.add(unit);
+        return true;
+    }
+
 
 
 }

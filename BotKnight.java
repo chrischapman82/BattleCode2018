@@ -5,7 +5,7 @@ public class BotKnight extends AttackingBot{
 
 
     public static void update(Unit unit) {
-        basicAttack(unit.id());
+        AttackingBot.update(unit);
     }
 
 
