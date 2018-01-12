@@ -32,6 +32,11 @@ public class Nav {
     // try hard to move through
     public static boolean tryHardMoveInDirection(int id, Direction dir) {
 
+
+        if (Player.gc.unit(id).movementHeat() >= 10) {
+            return false;
+        }
+
         if (Player.gc.canMove(id, dir)) {
             Player.gc.moveRobot(id, dir);
             return true;
@@ -39,29 +44,35 @@ public class Nav {
 
         // try going left-forward
         Direction dir_left = bc.bcDirectionRotateLeft(dir);
-        if (Player.gc.canMove(id, bc.bcDirectionRotateLeft(dir))) {
-            Player.gc.moveRobot(id, dir);
+        if (tryMoveForward(id, dir_left)) {
             return true;
         }
 
         // try going right-forward
         Direction dir_right = bc.bcDirectionRotateRight(dir);
-        if (Player.gc.canMove(id, dir_right)) {
-            Player.gc.moveRobot(id, dir_right);
+        if (tryMoveForward(id, dir_right)) {
             return true;
         }
 
         // Try going Left
         Direction dir_left_left = bc.bcDirectionRotateLeft(dir_left);
-        if (Player.gc.canMove(id, bc.bcDirectionRotateLeft(dir_left_left))) {
-            Player.gc.moveRobot(id, dir_left_left);
+        if (tryMoveForward(id, dir_left_left)) {
             return true;
         }
 
         // Try going Right
         Direction dir_right_right = bc.bcDirectionRotateRight(dir_right);
-        if (Player.gc.canMove(id, dir_right_right)) {
-            Player.gc.moveRobot(id, dir_right_right);
+        if (tryMoveForward(id, dir_right_right)) {
+            return true;
+        }
+        return false;
+    }
+
+    // helper function
+    public static boolean tryMoveForward(int id, Direction dir) {
+
+        if (Player.gc.canMove(id, dir)) {
+            Player.gc.moveRobot(id, dir);
             return true;
         }
 
@@ -88,6 +99,15 @@ public class Nav {
         // TODO: do something if you can't move int hat direction
         return tryHardMoveInDirection(id, dir_to_loc);
     }
+
+
+    // TODO: move as a group, pushing units along!
+    // can do this through checking if loc is blocked by friendly, and getting them to move first
+
+
+    //public static boolean tryGoToDirection(int id, Direction dir) {
+
+    //}
 
 
 
@@ -130,4 +150,5 @@ public class Nav {
         }
 
     }
+
 }

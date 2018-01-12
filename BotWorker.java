@@ -25,24 +25,30 @@ public class BotWorker extends Bot{
             System.out.println("Building...");
             return;
         }
+
+        System.out.println(Player.gc.karbonite() < 15 || unit.abilityCooldown() >= 10);
+        System.out.println(Player.gc.karbonite() < 15);
+        System.out.println(unit.abilityCooldown() >= 10);
+        System.out.println(unit.abilityCooldown());
         // 2. If can replicate. Do that.
         if (tryToReplicate(unit)) {
             System.out.println("Replicating...");
             return;
         }
 
-        // 3. Checks if I should build a factory
-        if (Globals.curr_factories < Globals.req_factories) {
+        // 3. Checks if I should and can build a factory,
+        if (Globals.curr_factories < Globals.req_factories && Player.gc.karbonite() >= bc.bcUnitTypeBlueprintCost(UnitType.Factory)) {
 
             if (tryToBlueprintFactory(id)) {
                 return;
             } else {
+                //TODO find a good factory spot
                 Nav.wander(id);
+                return;
             }
-            return;
         }
 
-        if (tryToMine(id, unit.location().mapLocation())) {
+        if (tryToMine(id)) {
             return;
         }
 
@@ -60,6 +66,11 @@ public class BotWorker extends Bot{
         // TODO making sure that I choose a good factory spot
         // where does not block friendly units, not on minerals
 
+        // check if I have enough money
+        if (Player.gc.karbonite() < bc.bcUnitTypeBlueprintCost(UnitType.Factory)) {
+            return false;
+        }
+
         for (Direction dir : Direction.values()) {
             //TODO: Don't place on ores?
 
@@ -73,7 +84,6 @@ public class BotWorker extends Bot{
                 Globals.curr_factories++;
                 return true;
             }
-
         }
         // if got here, couldn't find a spot to build factory
         //TODO find a spot where I can build a factory
@@ -87,13 +97,14 @@ public class BotWorker extends Bot{
     // TODO change random code so that it doesn't always start North
     public static boolean tryToReplicate(Unit unit) {
 
-        if (Player.gc.karbonite() < 15 || unit.abilityCooldown() >= 10) {
+        if (!Globals.need_workers || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
             return false;
         }
         for (Direction dir : Direction.values()) {
             if (Player.gc.canReplicate(unit.id(), dir)) {
                 Player.gc.replicate(unit.id(), dir);
                 System.out.println("I am replicating myself");
+                //Globals.need_workers = false;
                 return true;
             }
         }
@@ -127,7 +138,7 @@ public class BotWorker extends Bot{
         return false;
     }
 
-    public static boolean tryToMine(int id, MapLocation unit_maploc) {
+    public static boolean tryToMine(int id) {
 
         System.out.println("Trying to mine");
         //checks if any ore next to the worker:

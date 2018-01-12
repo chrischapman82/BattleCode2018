@@ -7,10 +7,9 @@ public class StructFactory {
         releaseGarrisonUnits(factory);
 
         // should always produce units. No point in not!
-        if (produceRobot(factory.id(), UnitType.Knight)) {
+        if (produceRobot(factory.id(), UnitType.Ranger)) {
             return;
         }
-
     }
 
     public static boolean releaseGarrisonUnits(Unit factory) {

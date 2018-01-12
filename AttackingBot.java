@@ -3,8 +3,6 @@
 import bc.*;
 public class AttackingBot extends Bot{
 
-
-
     public static void update(Unit unit) {
         basicAttack(unit.id());
     }
