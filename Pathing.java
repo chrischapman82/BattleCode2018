@@ -13,7 +13,6 @@ public class Pathing {
     public MapLocation curr_loc;
     public Direction curr_dir;
 
-
     public State state;
 
     public enum State {
