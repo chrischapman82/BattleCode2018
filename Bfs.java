@@ -8,22 +8,28 @@ import java.util.Collections;
 public class Bfs {
 
 
-    public static ArrayList<MapLocation> cameFrom;
-    public static ArrayList<Direction> dirFrom;
+    //public ArrayList<MapLocation> cameFrom;
+    public ArrayList<Direction> dirFrom;
+    public MapLocation end;
 
+    public Bfs(MapLocation end) {
+        this.end = end;
+        //cameFrom = new ArrayList<>();
+        dirFrom = new ArrayList<>();
+    }
 
-    public static void doBfs(MapLocation end) {
+    public ArrayList<Direction> doBfs() {
 
         /*init*/
 
         Queue<MapLocation> queue = new LinkedList<>();
         queue.add(end);
-        cameFrom = new ArrayList<>();
+        dirFrom = new ArrayList<>();
 
         for (int i = 0; i < Globals.earth_size; i++) {
-            cameFrom.add(null);
+            dirFrom.add(null);
         }
-        cameFrom.set(Tile.getIndex(end), null);
+        dirFrom.set(Tile.getIndex(end), null);
 
         Direction dir;
         MapLocation curr;
@@ -39,16 +45,18 @@ public class Bfs {
                     //System.out.println(Globals.earth.isPassableTerrainAt(next));
                     //System.out.println(next.getX());
                     queue.add(next);
-                    cameFrom.set(Tile.getIndex(next), curr);
+                    dirFrom.set(Tile.getIndex(next), dir);
                 }
             }
 
         }
+
+        return dirFrom;
     }
 
-    public static boolean isOpen(MapLocation curr, MapLocation dest) {
+    public boolean isOpen(MapLocation curr, MapLocation dest) {
     return (Globals.earth.onMap(dest)                   &&      // is it on the map
-            cameFrom.get(Tile.getIndex(dest)) == null   &&      // has the tile been visited
+            dirFrom.get(Tile.getIndex(dest)) == null   &&      // has the tile been visited
             curr.isAdjacentTo(dest))    &&      // Are we actually nex tot the dest
             !(Globals.earth.isPassableTerrainAt(dest) == 0);
     }
@@ -57,7 +65,7 @@ public class Bfs {
 
     // kind of reversed from usual
 
-   // public static void doBfs(MapLocation end) {
+   // public void doBfs(MapLocation end) {
 
         /*init*/
     /*
@@ -111,7 +119,7 @@ public class Bfs {
 
     // checks whether can move to the node in question.
 
-    /*public static boolean isOpen(MapLocation curr, MapLocation dest) {
+    /*public boolean isOpen(MapLocation curr, MapLocation dest) {
         return (Globals.earth.onMap(dest)                   &&      // is it on the map
                 cameFrom.get(Tile.getIndex(dest)) == null   &&      // has the tile been visited
                                 curr.isAdjacentTo(dest))    &&      // Are we actually nex tot the dest
@@ -119,7 +127,7 @@ public class Bfs {
     }*/
 
 /*
-    public static void reverse(MapLocation goal, MapLocation start) {
+    public void reverse(MapLocation goal, MapLocation start) {
         MapLocation curr = goal;
         ArrayList<MapLocation> path = new ArrayList<>();
         while (!curr.equals(start)) {
@@ -130,7 +138,8 @@ public class Bfs {
         Collections.reverse(path);
     }*/
 
-    public static void printBfs() {
+/*
+    public void printBfs() {
 
         MapLocation curr;
         for (int i=0; i<Globals.earth_size; i++) {
@@ -146,7 +155,7 @@ public class Bfs {
             }
         }
         System.out.println("**");
-    }
+    }*/
 
 }
 

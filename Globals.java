@@ -65,6 +65,11 @@ public class Globals {
         enemy_init_loc = findInitEnemyLoc();
         priorityEnemies = new ArrayList<>();
 
+
+        // time to init bfs:
+        Nav.initNavDirections(enemy_init_loc);
+
+
         // will have O(1) lookup this way.
         /*for (int i=0; i<earth_size; i++) {
             if ((earth.initialKarboniteAt(new MapLocation(Planet.Earth, i%earth_width,i*earth_width))) == 1) {

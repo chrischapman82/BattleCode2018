@@ -40,11 +40,11 @@ public class Player {
         Research.init();
 
 
-        if (gc.planet().equals(Planet.Earth)) {
-            Bfs.doBfs(Globals.findInitEnemyLoc());
+        //if (gc.planet().equals(Planet.Earth)) {
+            //Bfs.doBfs(Globals.findInitEnemyLoc());
             //Bfs.doBfs(new MapLocation(Planet.Earth, 10, 15));
             //Bfs.printBfs();
-        }
+        //}
 
         System.out.format("Enemy at: %s", Globals.enemy_init_loc.toString());
         //System.out.println(Globals.earth.isPassableTerrainAt(new MapLocation(Planet.Earth,0,0)));
@@ -76,7 +76,7 @@ public class Player {
 
                     // Defining stuff now
                     Unit unit = units.get(i);
-                    System.out.format("%s reporting in\n", unit.unitType());
+                    //System.out.format("%s reporting in\n", unit.unitType());
                     int id = unit.id();
                     Location unit_loc = unit.location();
 

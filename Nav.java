@@ -1,16 +1,30 @@
 import bc.*;
 
+import java.util.ArrayList;
+
 public class Nav {
 
+    public static ArrayList<Direction> directions;
 
     // i hate this location maplocation bs
     public static boolean moveTo(int id, MapLocation loc) {
         return moveTo(id, Player.gc.unit(id).location().mapLocation().directionTo(loc));
     }
 
+    public static void initNavDirections(MapLocation enemy_loc) {
+
+        Bfs bfs = new Bfs(enemy_loc);
+        directions = bfs.doBfs();
+    }
+
 
     public static boolean moveTo(int id, Direction dir) {
 
+        Direction cand_dir;
+        if ((cand_dir = directions.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
+            tryMoveInDirection(id, cand_dir);
+            return true;
+        }
         // try moving normally
         if (tryMoveInDirection(id, dir)) {
             return true;
