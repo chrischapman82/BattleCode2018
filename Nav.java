@@ -196,13 +196,13 @@ public class Nav {
 
     public static void wander(int id) {
 
-        System.out.println("Attempting to wander");
+        //System.out.println("Attempting to wander");
         if (Player.gc.isMoveReady(id)) {
             //dont think is move ready is working
             //if (gc.isMoveReady(id)) {
             int NUM_TRIES = 10;
             // just wander I guess. Which sounds pretty shit tbh
-            System.out.println("I am allowed to wander");
+            //System.out.println("I am allowed to wander");
 
             Direction[] dirs = Direction.values();
 
@@ -213,7 +213,7 @@ public class Nav {
                 // System.out.format("%s\n", dir);
                 if (Player.gc.canMove(id, dir)) {
                     Player.gc.moveRobot(id, dir);
-                    System.out.println("Wandering");
+                    //System.out.println("Wandering");
                     break;
                 }
             }

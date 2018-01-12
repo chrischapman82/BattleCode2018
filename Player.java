@@ -17,30 +17,37 @@ public class Player {
 
         // MapLocation is a data structure you'll use a lot.
         MapLocation loc = new MapLocation(Planet.Earth, 10, 20);
-        System.out.println("loc: "+loc+", one step to the Northwest: "+loc.add(Direction.Northwest));
-        System.out.println("loc x: "+loc.getX());
+        //System.out.println("loc: "+loc+", one step to the Northwest: "+loc.add(Direction.Northwest));
+        //System.out.println("loc x: "+loc.getX());
 
         // One slightly weird thing: some methods are currently static methods on a static class called bc.
         // This will eventually be fixed :/
-        System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
-        System.out.println(bc.bcDirectionRotateLeft(Direction.North));
+        //System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
+        //System.out.println(bc.bcDirectionRotateLeft(Direction.North));
 
         // Connect to the manager, starting the game
         gc = new GameController();
 
         PlanetMap map = Player.gc.startingMap(Planet.Earth);
-        System.out.println("*****");
-        System.out.println("Map height and width");
-        System.out.println(map);
+        //System.out.println("*****");
+        //System.out.println("Map height and width");
+        //System.out.println(map);
         System.out.format("%d %d", map.getHeight(), map.getWidth());
-        //System.out.println(gc.startingMap(Planet.Earth).getInitial_units().get(0));
+        ////System.out.println(gc.startingMap(Planet.Earth).getInitial_units().get(0));
 
         // Initialise globals and Qing research
         Globals.init();
         Research.init();
 
+
+        if (gc.planet().equals(Planet.Earth)) {
+            Bfs.doBfs(Globals.findInitEnemyLoc());
+            //Bfs.doBfs(new MapLocation(Planet.Earth, 10, 15));
+            //Bfs.printBfs();
+        }
+
         System.out.format("Enemy at: %s", Globals.enemy_init_loc.toString());
-        System.out.println(Globals.earth.isPassableTerrainAt(new MapLocation(Planet.Earth,0,0)));
+        //System.out.println(Globals.earth.isPassableTerrainAt(new MapLocation(Planet.Earth,0,0)));
         // Direction is a normal java enum.
         Direction[] directions = Direction.values();
 
@@ -57,7 +64,7 @@ public class Player {
 
 
         while (true) {
-            //System.out.println("Current round: "+gc.round());
+            ////System.out.println("Current round: "+gc.round());
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
             VecUnit units = gc.myUnits();
 
@@ -73,12 +80,12 @@ public class Player {
                     int id = unit.id();
                     Location unit_loc = unit.location();
 
-                    //System.out.println("Unit loc:");
-                    //System.out.println(unit_loc);
+                    ////System.out.println("Unit loc:");
+                    ////System.out.println(unit_loc);
 
                     // if the unit is garrisoned or in a rocket. Do nothing as it can't do anything.
                     if (unit_loc.isInGarrison() && !unit.unitType().equals(UnitType.Factory)) {
-                        System.out.println("Is garrisoned, do nothing");
+                        //System.out.println("Is garrisoned, do nothing");
                         continue;
                     }
 
@@ -122,11 +129,11 @@ public class Player {
 
     // gets a random direction
     public static Direction getRandomDir() {
-        System.out.println("Getting random direction");
+        //System.out.println("Getting random direction");
         // fairly sure this isn't random. In fact it's super unlikely to be the last value
         int rand = (int)(Math.random()*Direction.values().length);
         System.out.format("rand = %d, len = %d\n", rand, Direction.values().length);
-        System.out.println();
+        //System.out.println();
         return Direction.values()[rand];
     }
 

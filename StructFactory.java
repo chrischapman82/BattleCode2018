@@ -8,6 +8,7 @@ public class StructFactory {
 
         // should always produce units. No point in not!
         if (produceRobot(factory.id(), UnitType.Ranger)) {
+            Globals.prev_rangers++;
             return;
         }
     }

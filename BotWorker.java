@@ -22,22 +22,22 @@ public class BotWorker extends Bot{
 
         // 1. Checks if any nearby blueprints should be built
         if (tryToBuild(unit)) {
-            System.out.println("Building...");
+            //System.out.println("Building...");
             return;
         }
 
-        System.out.println(Player.gc.karbonite() < 15 || unit.abilityCooldown() >= 10);
-        System.out.println(Player.gc.karbonite() < 15);
-        System.out.println(unit.abilityCooldown() >= 10);
-        System.out.println(unit.abilityCooldown());
+        //System.out.println(Player.gc.karbonite() < 15 || unit.abilityCooldown() >= 10);
+        //System.out.println(Player.gc.karbonite() < 15);
+        //System.out.println(unit.abilityCooldown() >= 10);
+        //System.out.println(unit.abilityCooldown());
         // 2. If can replicate. Do that.
         if (tryToReplicate(unit)) {
-            System.out.println("Replicating...");
+            //System.out.println("Replicating...");
             return;
         }
 
         // 3. Checks if I should and can build a factory,
-        if (Globals.curr_factories < Globals.req_factories && Player.gc.karbonite() >= bc.bcUnitTypeBlueprintCost(UnitType.Factory)) {
+        if (Globals.prev_factories < Globals.req_factories && Player.gc.karbonite() >= bc.bcUnitTypeBlueprintCost(UnitType.Factory)) {
 
             if (tryToBlueprintFactory(id)) {
                 return;
@@ -99,14 +99,14 @@ public class BotWorker extends Bot{
         for (Direction dir : Direction.values()) {
             //TODO: Don't place on ores?
 
-            System.out.println("Looking for a place to put the factory");
+            //System.out.println("Looking for a place to put the factory");
             if (Player.gc.canBlueprint(id, UnitType.Factory, dir)) {
 
-                System.out.println("Placing Factory blueprint.");
+                //System.out.println("Placing Factory blueprint.");
                 Player.gc.blueprint(id, UnitType.Factory, dir);
                 // am I allowed to build straight away?
-                System.out.println("Factory blueprint placed.");
-                Globals.curr_factories++;
+                //System.out.println("Factory blueprint placed.");
+                Globals.prev_factories++;
                 return true;
             }
         }
@@ -122,13 +122,13 @@ public class BotWorker extends Bot{
     // TODO change random code so that it doesn't always start North
     public static boolean tryToReplicate(Unit unit) {
 
-        if (!Globals.need_workers || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
+        if ((Globals.prev_workers < Globals.req_workers) || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
             return false;
         }
         for (Direction dir : Direction.values()) {
             if (Player.gc.canReplicate(unit.id(), dir)) {
                 Player.gc.replicate(unit.id(), dir);
-                System.out.println("I am replicating myself");
+                Globals.prev_workers++;
                 //Globals.need_workers = false;
                 return true;
             }
@@ -165,14 +165,14 @@ public class BotWorker extends Bot{
 
     public static boolean tryToMine(int id) {
 
-        System.out.println("Trying to mine");
+        //System.out.println("Trying to mine");
         //checks if any ore next to the worker:
         Direction candidate_dir = Player.getRandomDir();
         for (int i = 0; i < Globals.NUM_DIRECTIONS; i++) {
             candidate_dir = bc.bcDirectionRotateLeft(candidate_dir);
             if (Player.gc.canHarvest(id, candidate_dir)) {
                 Player.gc.harvest(id, candidate_dir);
-                System.out.println("Mining...");
+                //System.out.println("Mining...");
 
 
                 // remove the spot from the map

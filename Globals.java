@@ -18,8 +18,6 @@ public class Globals {
     public static int req_factories = 2;  // I want one as soon as ossible
 
     public static int NUM_DIRECTIONS = 8;
-    public static int INITIAL_CAPACITY = 11;    // TODO: Should be able to know what the max cap is
-
 
     // map dimensions:
     public static int earth_width;
@@ -31,14 +29,19 @@ public class Globals {
     public static int num_knights;
     public static int num_rangers;
 
-    public static int req_workers = 5;
+    // number of each for the previous turn.
+    // start high will only last 1 turn. Used to make sure that mass replication doesn't happen first round
+    public static int prev_workers = 100;
+    public static int prev_factories = 100;
+    public static int prev_knights = 100;
+    public static int prev_rangers = 100;
+
+    public static int req_workers = 4;
 
     public static boolean need_workers = false;
     public static boolean needFactory = false;
 
     public static ArrayList<Boolean> initKarboniteSpots;
-
-    public static int curr_factories = 0;       //TODO: This should be changed to needFactory to work at some point
 
     public static ArrayList<Unit> priorityEnemies;
 
@@ -96,6 +99,11 @@ public class Globals {
 
     public static void resetUnitCounters() {
 
+        prev_workers = num_workers;
+        prev_factories = num_factories;
+        prev_knights = num_knights;
+        prev_rangers = num_rangers;
+
         num_workers = 0;
         num_factories = 0;
         num_knights = 0;
@@ -124,7 +132,7 @@ public class Globals {
 
     public static void updateUnitReqs() {
 
-        if (num_workers < req_workers) {
+        if (prev_workers < req_workers) {
             need_workers = true;
         } else {
             need_workers = false;

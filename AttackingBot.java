@@ -54,8 +54,8 @@ public class AttackingBot extends Bot{
         if (Player.gc.isAttackReady(id) && Player.gc.canAttack(id, enemy_id)) {
             // can I attack them?
 
-            Player.gc.attack(id, enemy_id);
             checkIfEnemyKilled(Player.gc.unit(id), Player.gc.unit(enemy_id));
+            Player.gc.attack(id, enemy_id);
             return true;
         }
         return false;

@@ -16,8 +16,6 @@ public class BotRanger extends AttackingBot {
                 markUnit(enemy);
             }
         }
-
-
         AttackingBot.update(unit);
 
         // focus fire is good, so always have at least 1 enemy stored
