@@ -129,8 +129,9 @@ public class Globals {
         }
     }
 
+    // Not really being used atm
     public static void updateUnitReqs() {
-        System.out.format("prev_works = %d, req_workers = %d, num_workers = %d\n", prev_workers, req_workers, num_workers);
+        //System.out.format("prev_workers = %d, req_workers = %d, num_workers = %d\n", prev_workers, req_workers, num_workers);
         if (prev_workers < req_workers) {
             need_workers = true;
         } else {

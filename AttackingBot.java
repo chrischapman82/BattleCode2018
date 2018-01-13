@@ -58,8 +58,20 @@ public class AttackingBot extends Bot{
 
     public static boolean attack(Unit unit, VecUnit enemies) {
 
+
+        // hacky fix atm
         int id = unit.id();
         if ((enemies.size() > 0)) {
+
+            // hacky fix atm for Rangers not being able to attack if an enemy is in meelee range
+            if (unit.unitType() == UnitType.Ranger) {   // TODO: FIX
+                for (int i=0; i < enemies.size(); i++) {
+                    if (tryAttack(id, enemies.get(i).id())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
             Unit enemy = chooseLowestHpEnemy(enemies);
             int enemy_id = enemy.id();
             return (tryAttack(id, enemy_id));

@@ -30,6 +30,9 @@ public class BotRanger extends AttackingBot {
         return false;
     }
 
+
+    
+
     // TODO: change targeting to do with min range
 
     // TODO: I'd like to add a better score at one point

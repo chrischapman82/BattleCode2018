@@ -36,9 +36,9 @@ public class Player {
             // try to reset for each round
             Globals.updateGlobals();
 
-            try {
-                for (int i = 0; i < units.size(); i++) {
 
+                for (int i = 0; i < units.size(); i++) {
+                    try {
 
                     // Storing the unit and other info for later use
                     Unit unit = units.get(i);
@@ -67,14 +67,16 @@ public class Player {
                     } else {
                         BotRanger.update(unit);
                     }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 // Updates the unit requirements, giving a better current state of the units
                 Globals.updateUnitReqs();
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
 
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();

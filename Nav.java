@@ -94,6 +94,10 @@ public class Nav {
     // else: false
     public static boolean tryMoveDirAndPushAlly(Unit unit, Direction dir) {
 
+        if (unit.movementHeat() >= 10) {
+            return false;
+        }
+
         MapLocation unit_loc = unit.location().mapLocation();
         MapLocation candidate_loc = unit_loc.add(dir);
 
@@ -309,7 +313,7 @@ public class Nav {
     // cuts down on comp time
     public static boolean tryMoveForward(int id, Direction dir) {
 
-        if (Player.gc.canMove(id, dir)) {
+        if (Player.gc.canMove(id, dir) && Player.gc.unit(id).movementHeat() < 10) {
             Player.gc.moveRobot(id, dir);
             return true;
         }

@@ -24,6 +24,7 @@ public class Bot extends Unit {
         return Nav.tryToRetreat(unit, retreat_dir);     // so that can change for each bot
     }
 
+    // basically an abstract method
     public static void update(Unit unit) {
 
     }
@@ -39,6 +40,7 @@ public class Bot extends Unit {
     }
 
     public static VecUnit getAttackableEnemies(Unit unit) {
+
         return Player.gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.attackRange(), Globals.them);
     }
 
@@ -56,6 +58,7 @@ public class Bot extends Unit {
     }*/
 
     // basically a max fn lul
+
     public static Unit chooseClosestEnemy(Unit unit, VecUnit enemies) {
 
         if (enemies.size() == 0) {
@@ -77,6 +80,42 @@ public class Bot extends Unit {
                 priority_dist = curr_dist;
             }
         }
+        return priority_enemy;
+    }
+
+    public static Unit chooseClosestAttackableEnemy(Unit unit, VecUnit enemies) {
+
+        if (enemies.size() == 0) {
+            return null;
+        }
+
+        // some shitty ass finding of the prio unit
+        Unit priority_enemy = null;
+        float priority_dist = unit.location().mapLocation().distanceSquaredTo(priority_enemy.location().mapLocation());
+        Unit curr_enemy;
+        float curr_dist;
+        long min_range;
+
+        for (int i=0; i<enemies.size(); i++) {
+            curr_enemy = enemies.get(i);
+
+            // setting up the min range
+            // TODO move to ranger
+            if (unit.unitType().equals(UnitType.Ranger)) {
+                min_range = unit.rangerCannotAttackRange();
+            } else {
+                min_range = 0;
+            }
+
+            // compares the distance between the unit and the enemy with the old closest
+            if ((curr_dist = unit.location().mapLocation().distanceSquaredTo(curr_enemy.location().mapLocation()))
+                    < priority_dist && curr_dist > min_range) {
+
+                priority_enemy = curr_enemy;
+                priority_dist = curr_dist;
+                }
+
+            }
         return priority_enemy;
     }
 }
