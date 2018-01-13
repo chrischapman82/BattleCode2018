@@ -5,6 +5,7 @@ import java.util.Queue;
 import java.util.Collections;
 
 
+// Information about the map using breadth first search to find stuff
 public class Bfs {
 
 
@@ -18,52 +19,60 @@ public class Bfs {
         dirFrom = new ArrayList<>();
     }
 
+    // does breadth first search to find a way from each square to get to the location
+    // Is NOT the fastest path atm, but will do for now
+    // Gets a map in which each tile has a direction to follow in order to get to the end loc
     public ArrayList<Direction> doBfs() {
 
         /*init*/
-
         Queue<MapLocation> queue = new LinkedList<>();
-        queue.add(end);
-        dirFrom = new ArrayList<>();
+        queue.add(end);                 // Q containing all endings
+        dirFrom = new ArrayList<>();    // direction list
 
+        // setting all initial direction to null
         for (int i = 0; i < Globals.earth_size; i++) {
             dirFrom.add(null);
         }
-        dirFrom.set(Tile.getIndex(end), null);
+        dirFrom.set(Tile.getIndex(end), null);          // may not be needed
 
         Direction dir;
         MapLocation curr;
         MapLocation next;
+
+        // iterates through all reachable parts of the map
+        // TODO: what happens if end is unreachable
         while (!queue.isEmpty()) {
             curr = queue.remove();
-            dir = Direction.North;  // doesn't really matter, will iterate through all anyway
+            dir = Direction.North;  // dir doesn't really matter, will iterate through all dirs anyway
             for (int i = 0; i < Globals.NUM_DIRECTIONS; i++) {
                 dir = bc.bcDirectionRotateLeft(dir);
                 next = curr.add(dir);
 
+                // if tile is open, add to the queue of tiles to check form
                 if (isOpen(curr, next)) {
-                    //System.out.println(Globals.earth.isPassableTerrainAt(next));
-                    //System.out.println(next.getX());
                     queue.add(next);
                     dirFrom.set(Tile.getIndex(next), dir);
                 }
             }
-
         }
-
         return dirFrom;
     }
 
+
+    /*  Checks if the given destination is:
+     *  on the map, !visited, adjacent to the prev tile and can be moved onto
+    */
     public boolean isOpen(MapLocation curr, MapLocation dest) {
     return (Globals.earth.onMap(dest)                   &&      // is it on the map
-            dirFrom.get(Tile.getIndex(dest)) == null   &&      // has the tile been visited
-            curr.isAdjacentTo(dest))    &&      // Are we actually nex tot the dest
-            !(Globals.earth.isPassableTerrainAt(dest) == 0);
+            dirFrom.get(Tile.getIndex(dest)) == null    &&      // has the tile been visited
+            curr.isAdjacentTo(dest))                    &&      // Are we actually nex tot the dest
+            !(Globals.earth.isPassableTerrainAt(dest) == 0);    // Can be move onto?
     }
 
 
 
     // kind of reversed from usual
+    // Some stuff that I was playing around with that sucked dick.
 
    // public void doBfs(MapLocation end) {
 

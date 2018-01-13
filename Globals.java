@@ -1,10 +1,8 @@
 import bc.*;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
 
-// stores the globals, reducing clutter in Player
+// stores the global vars accessed by all, reducing clutter in Player
 public class Globals {
 
     public static Team us;
@@ -14,9 +12,7 @@ public class Globals {
     public static MapLocation enemy_init_loc;
     public static PlanetMap earth;
 
-
     public static int req_factories = 2;  // I want one as soon as ossible
-
     public static int NUM_DIRECTIONS = 8;
 
     // map dimensions:
@@ -47,6 +43,7 @@ public class Globals {
 
     public static void init() {
 
+        // setting up teams
         us = Player.gc.team();
         // I hope there's a better way for this
         if (us.equals(Team.Red)) {
@@ -55,6 +52,7 @@ public class Globals {
             them = Team.Red;
         }
 
+        // initialising the earth
         earth = Player.gc.startingMap(Planet.Earth);
         //earth.initialKarboniteAt();
 
@@ -83,8 +81,6 @@ public class Globals {
     // finds an initial location to go to.
     public static MapLocation findInitEnemyLoc() {
 
-        //Player.gc.myUnits().get(0).location().mapLocation();
-
         VecUnit all_units = earth.getInitial_units();
         for (int i=0; i< all_units.size(); i++) {
             Unit curr_unit = all_units.get(i);
@@ -96,11 +92,9 @@ public class Globals {
         return null;
     }
 
-
-    public static MapLocation invert(MapLocation location) {
-        return null;
+    public static void updateGlobals() {
+        resetUnitCounters();
     }
-
 
     public static void resetUnitCounters() {
 
@@ -136,7 +130,7 @@ public class Globals {
     }
 
     public static void updateUnitReqs() {
-
+        System.out.format("prev_works = %d, req_workers = %d, num_workers = %d\n", prev_workers, req_workers, num_workers);
         if (prev_workers < req_workers) {
             need_workers = true;
         } else {
@@ -162,6 +156,12 @@ public class Globals {
             return true;
         }
         return false;
+    }
+
+    // prints infromation about the map for debugging purposes
+    public static void printMapInfo() {
+        // print the width, height etc.
+        System.out.format("MAP INFO: width = %d, height = %d\n", earth_width, earth_height);
     }
 
 }

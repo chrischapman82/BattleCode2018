@@ -4,4 +4,9 @@ public class Debug {
     public static void indicateDot(){
 
     }
+
+    // Error printing
+    public static void printMessage(String message) {
+        System.out.println(message);
+    }
 }

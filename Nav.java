@@ -4,20 +4,21 @@ import java.util.ArrayList;
 
 public class Nav {
 
-    public static ArrayList<Direction> directions;
+    public static ArrayList<Direction> directions;      // should pair up with the mapLocation or at least name according to
 
-    // i hate this location maplocation bs
-    public static boolean moveTo(int id, MapLocation loc) {
-        return moveTo(id, Player.gc.unit(id).location().mapLocation().directionTo(loc));
-    }
-
+    // Initialises the map containing directions to the enemy location
     public static void initNavDirections(MapLocation enemy_loc) {
 
         Bfs bfs = new Bfs(enemy_loc);
         directions = bfs.doBfs();
     }
 
+    // Moving using MapLocation. Calls other fn
+    public static boolean moveTo(int id, MapLocation loc) {
+        return moveTo(id, getMapLocFromId(id).directionTo(loc));
+    }
 
+    // Moves in the given direction
     public static boolean moveTo(int id, Direction dir) {
 
         Direction cand_dir;
@@ -30,10 +31,11 @@ public class Nav {
             return true;
         }
 
-        Unit friend;
         // if friendly unit is in our way, politely ask them to move
+        Unit friend;
+        MapLocation cand_loc = getMapLocFromId(id).add(dir);        // the location i'd like to check
 
-        if ((friend = Player.gc.senseUnitAtLocation(getMapLocFromId(id).add(dir))).team().equals(Globals.us)) {
+        if ((friend = getFriendlyUnitAtLocation(getMapLocFromId(id))) != null) {
             if (politelyAskToMove(friend, dir)) {
                 moveTo(id, dir);
             }
@@ -41,8 +43,23 @@ public class Nav {
         return false;
     }
 
+    // if friendly unit at the map loc, returns it.
+    // Otherwise, returns null
+    public static Unit getFriendlyUnitAtLocation(MapLocation loc) {
+        Unit friend;
+        if (Player.gc.hasUnitAtLocation(loc) && (friend = Player.gc.senseUnitAtLocation(loc)).team().equals(Globals.us)) {
+            return friend;
+        }
+
+        return null;
+    }
+
+    //public static Unit getUnitAtMapLoc() {
+        //return Player.gc.senseUnitAtLocation();
+    //}
+
     // Tells a unit to please move.
-    // The unit knows which way it's being pushed
+    // The unit knows which way it's being pushed.
     public static boolean politelyAskToMove(Unit ally_unit, Direction dir) {
 
         if (tryMakeWay(ally_unit.id(), dir)) {
@@ -51,8 +68,85 @@ public class Nav {
         return false;
     }
 
-    // tries to make way for a friend.
+    // for trying to retreat the given unit in the given direction
+    public static boolean tryToRetreat(Unit unit, Direction dir) {
+
+        if (tryMoveDirAndPushAlly(unit, dir)) {
+            return true;
+        }
+
+        Direction dir_left = bc.bcDirectionRotateLeft(dir);
+        if (tryMoveDirAndPushAlly(unit, dir_left)) {
+            return true;
+        }
+
+        Direction dir_right = bc.bcDirectionRotateLeft(dir);
+        if (tryMoveDirAndPushAlly(unit, dir_right)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // checks if there is an ally blocking the way
+    // if there is, push them.
+    // if was able to move to this location, return true
+    // else: false
+    public static boolean tryMoveDirAndPushAlly(Unit unit, Direction dir) {
+
+        MapLocation unit_loc = unit.location().mapLocation();
+        MapLocation candidate_loc = unit_loc.add(dir);
+
+        // checks if the location is blocked by terrain or off the map
+        if (!Globals.earth.onMap(candidate_loc) || Globals.earth.isPassableTerrainAt(candidate_loc) == 0) {
+            return false;
+        }
+
+        Unit friend;
+        if ((getFriendlyUnitAtLocation(unit_loc.add(dir))) != null) {
+            friend = getFriendlyUnitAtLocation(unit_loc.add(dir));
+            if (rudelyAskToMove(friend, dir)) {
+                return tryMoveForward(unit.id(), dir);
+            }
+        } else if (tryMoveForward(unit.id(), dir)) {
+            return true;
+        }
+        return false;
+    }
+
+    // Rudely pushes the unit forward.
+    // Often used for retreating
+
+    // Unit tries to move in the given direction, asking others to move if required
+    public static boolean rudelyAskToMove(Unit ally_unit, Direction dir) {
+        if (ally_unit.movementHeat() >= 10) {
+            return false;
+        }
+
+        // If there's a mate there, tell them to move.
+        // otherwise, move ot teh spot
+        Unit friend;
+
+        if (tryMoveDirAndPushAlly(ally_unit, dir)) {
+            return true;
+        }
+
+        // try to move center left
+        Direction dir_left = bc.bcDirectionRotateLeft(dir);
+        if (tryMoveDirAndPushAlly(ally_unit, dir_left)) {
+            return true;
+        }
+
+        Direction dir_right = bc.bcDirectionRotateLeft(dir);
+        if (tryMoveDirAndPushAlly(ally_unit, dir_right)) {
+            return true;
+        }
+        return false;
+    }
+
+    // tries to make way for a mate.
     // Prioritises moving to the side rather than forward
+    //TODO combine with politelyAsk
     public static boolean tryMakeWay(int id, Direction dir) {
 
         if (Player.gc.unit(id).movementHeat() >= 10) {
@@ -99,13 +193,13 @@ public class Nav {
             return true;
         }
 
-        // try going left
+        // try going left-centre
         dir = bc.bcDirectionRotateLeft(dir);
         if (tryMoveForward(id, dir)) {
             return true;
         }
 
-        // try going right
+        // try going right-centre
         dir = bc.bcDirectionRotateRight(dir);
         if (tryMoveForward(id, dir)) {
             return true;
@@ -153,16 +247,6 @@ public class Nav {
         return false;
     }
 
-    // helper function
-    public static boolean tryMoveForward(int id, Direction dir) {
-
-        if (Player.gc.canMove(id, dir)) {
-            Player.gc.moveRobot(id, dir);
-            return true;
-        }
-
-        return false;
-    }
 
 
     // if I only have unit
@@ -170,7 +254,8 @@ public class Nav {
         return tryGoToMapLocation(unit.id(), map_loc);
     }
 
-    // it sucks switching between unit and id but gotta be done for speed
+    // Try going to the given MapLocation
+    // Very low computational power atm, using no real path finding.
     public static boolean tryGoToMapLocation(int id, MapLocation map_loc) {
 
         Unit unit = Player.gc.unit(id);
@@ -178,7 +263,6 @@ public class Nav {
         if (unit.location().mapLocation().equals(map_loc)) {
             return false;
         }
-
         Direction dir_to_loc = dirToMapLoc(unit, map_loc);
 
         // TODO: do something if you can't move int hat direction
@@ -189,54 +273,61 @@ public class Nav {
     // TODO: move as a group, pushing units along!
     // can do this through checking if loc is blocked by friendly, and getting them to move first
 
-
-    //public static boolean tryGoToDirection(int id, Direction dir) {
-
-    //}
-
-
-
-    // moves to where the enemy was init situated
+    // Moves to the enemy base.
     public static boolean moveToEnemyBase(int id) {
 
+        // if no one left at enemy base, should update messaging.
         return tryGoToMapLocation(id, Globals.enemy_init_loc);
     }
 
-    // gets the direction to a map location for a unit
-    public static Direction dirToMapLoc(Unit unit, MapLocation map_loc) {
 
-        return unit.location().mapLocation().directionTo(map_loc);
-    }
-
-
+    /*  Wandering around aimlessly
+     *  As this gets more sophistocated, should cut down on using this
+    */
     public static void wander(int id) {
-
-        //System.out.println("Attempting to wander");
         if (Player.gc.isMoveReady(id)) {
-            //dont think is move ready is working
-            //if (gc.isMoveReady(id)) {
-            int NUM_TRIES = 10;
-            // just wander I guess. Which sounds pretty shit tbh
-            //System.out.println("I am allowed to wander");
 
-            Direction[] dirs = Direction.values();
+            // chooses a random direction, and goes in that dir
+            Direction dir = Player.getRandomDir();
 
-            int num_directions = Direction.values().length;
-            int rand = (int)(Math.random()*num_directions);
-            for (int k=0; k<num_directions; k++) {
-                Direction dir = dirs[(rand+k)%num_directions];
-                // System.out.format("%s\n", dir);
+            // currently just rotating to the left. Could mean that units favour going a particular way
+            for (int k=0; k<Direction.values().length; k++) {
+                dir = bc.bcDirectionRotateLeft(dir);
                 if (Player.gc.canMove(id, dir)) {
                     Player.gc.moveRobot(id, dir);
-                    //System.out.println("Wandering");
-                    break;
+                    return;
                 }
             }
         }
 
     }
 
-    // this has been frustrating af
+                                    /*              HELPER FUNCTIONS            */
+
+    // Moves forward in the target direction if possible
+    // Assumes that the move heat has been checked, so make sure to do that first
+    // cuts down on comp time
+    public static boolean tryMoveForward(int id, Direction dir) {
+
+        if (Player.gc.canMove(id, dir)) {
+            Player.gc.moveRobot(id, dir);
+            return true;
+        }
+
+        return false;
+    }
+
+    // helps out using unit
+    public static boolean tryMoveForward(Unit unit, Direction dir) {
+        return tryMoveForward(unit.id(), dir);
+    }
+
+    // gets the direction to a map location for a unit
+    public static Direction dirToMapLoc(Unit unit, MapLocation map_loc) {
+        return unit.location().mapLocation().directionTo(map_loc);
+    }
+    // Helper function as getting a map location from id is incredibly frustrating
+    // Takes an id, and returns a mapLocation
     public static MapLocation getMapLocFromId(int id) {
         return Player.gc.unit(id).location().mapLocation();
     }

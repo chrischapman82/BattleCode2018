@@ -2,91 +2,50 @@
 // See xxx for the javadocs.
 import bc.*;
 
+import java.util.Random;
+
 public class Player {
 
-    // I really like the gc being easily accessible
-    // public static GameController gc;
+    // The class that controls everything!
 
+    // The game controller, basically called for everything. Means that I have to constantly call player but whatever I guess
     public static GameController gc;
-    // storing some mapLocations
-    public static MapLocation loc0;
-
-    //Researching
 
     public static void main(String[] args) {
-
-        // MapLocation is a data structure you'll use a lot.
-        MapLocation loc = new MapLocation(Planet.Earth, 10, 20);
-        //System.out.println("loc: "+loc+", one step to the Northwest: "+loc.add(Direction.Northwest));
-        //System.out.println("loc x: "+loc.getX());
-
-        // One slightly weird thing: some methods are currently static methods on a static class called bc.
-        // This will eventually be fixed :/
-        //System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
-        //System.out.println(bc.bcDirectionRotateLeft(Direction.North));
 
         // Connect to the manager, starting the game
         gc = new GameController();
 
-        PlanetMap map = Player.gc.startingMap(Planet.Earth);
-        //System.out.println("*****");
-        //System.out.println("Map height and width");
-        //System.out.println(map);
-        System.out.format("%d %d", map.getHeight(), map.getWidth());
-        ////System.out.println(gc.startingMap(Planet.Earth).getInitial_units().get(0));
-
-        // Initialise globals and Qing research
+        // Initialise globals and queuing research
         Globals.init();
         Research.init();
 
-
-        //if (gc.planet().equals(Planet.Earth)) {
-            //Bfs.doBfs(Globals.findInitEnemyLoc());
-            //Bfs.doBfs(new MapLocation(Planet.Earth, 10, 15));
-            //Bfs.printBfs();
-        //}
-
+        // checking out whether everything's working!
+        Globals.printMapInfo();
         System.out.format("Enemy at: %s", Globals.enemy_init_loc.toString());
-        //System.out.println(Globals.earth.isPassableTerrainAt(new MapLocation(Planet.Earth,0,0)));
-        // Direction is a normal java enum.
-        Direction[] directions = Direction.values();
-
-
-        //initialMap = bc.bcPlanetMapFromJson()
-        // Getting the teams for both. Used in some of the given methods
-        // Seems like a dumb way to do it, but here we are.
 
         //TODO: Create an array at the start to find all locations w/ kryptonite
         //PlanetMap map = gc.startingMap(Planet.Earth);
-
         //TODO: Identify choke point
 
-
-
         while (true) {
-            ////System.out.println("Current round: "+gc.round());
+            System.out.println("Current round: "+gc.round());
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
             VecUnit units = gc.myUnits();
 
-            // reset at the start of every round
-            Globals.resetUnitCounters();
+            // try to reset for each round
+            Globals.updateGlobals();
 
             try {
                 for (int i = 0; i < units.size(); i++) {
 
-                    // Defining stuff now
-                    Unit unit = units.get(i);
-                    //unit = (BotHealer)unit;
-                    System.out.println(unit.id());
-                    //System.out.format("%s reporting in\n", unit.unitType());
-                    int id = unit.id();
-                    Location unit_loc = unit.location();
 
-                    ////System.out.println("Unit loc:");
-                    ////System.out.println(unit_loc);
+                    // Storing the unit and other info for later use
+                    Unit unit = units.get(i);
+                    //System.out.format("%s reporting in\n", unit.unitType());
 
                     // if the unit is garrisoned or in a rocket. Do nothing as it can't do anything.
-                    if (unit_loc.isInGarrison() && !unit.unitType().equals(UnitType.Factory)) {
+                    if (unit.location().isInGarrison() && !unit.unitType().equals(UnitType.Factory)) {
                         //System.out.println("Is garrisoned, do nothing");
                         continue;
                     }
@@ -96,7 +55,7 @@ public class Player {
                     Globals.countUnit(unit_type);
 
                     // switch was being real dodgy so I guess if statements it is
-                    // Going through all the unit types
+                    // Changing for each type of unit and delegating to subclasses
                     if (unit_type.equals(UnitType.Factory)) {
                         StructFactory.update(unit);
 
@@ -110,33 +69,40 @@ public class Player {
                     }
                 }
 
-
-                // checks if we're going to need more of a type of unit next round
+                // Updates the unit requirements, giving a better current state of the units
                 Globals.updateUnitReqs();
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-
-            /* TODO: Find a way to check if we have enough factories at a certain point
-            if (Globals.num_factories != Globals.req_factories) {
-
-            }*/
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }
     }
-    // builds a factory. Returns true if a factory was built, else returns false.
 
     // gets a random direction
     public static Direction getRandomDir() {
         //System.out.println("Getting random direction");
         // fairly sure this isn't random. In fact it's super unlikely to be the last value
-        int rand = (int)(Math.random()*Direction.values().length);
-        System.out.format("rand = %d, len = %d\n", rand, Direction.values().length);
-        //System.out.println();
-        return Direction.values()[rand];
+        Random rand = new Random(178);
+        //System.out.format("rand = %s\n", rand);
+        return Direction.values()[rand.nextInt(Globals.NUM_DIRECTIONS)];
+    }
+
+    public static void rememberingMethods() {
+
+        // MapLocation is a data structure you'll use a lot.
+        MapLocation loc = new MapLocation(Planet.Earth, 10, 20);
+
+        // Getting locs with directions
+        System.out.println("loc: "+loc+", one step to the Northwest: "+loc.add(Direction.Northwest));
+        //System.out.println("loc x: "+loc.getX());
+
+        //System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
+        //System.out.println(bc.bcDirectionRotateLeft(Direction.North));
+
+        System.out.format("%d %d", Globals.earth_width, Globals.earth_width);
     }
 
 }

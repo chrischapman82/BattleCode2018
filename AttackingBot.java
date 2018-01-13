@@ -7,45 +7,64 @@ public class AttackingBot extends Bot{
 
         // general vars
         int id = unit.id();
-        MapLocation curr_loc = unit.location().mapLocation();
         VecUnit attackable_enemies = getAttackableEnemies(unit);
         VecUnit viewable_enemies = getViewableEnemies(unit);
 
         Unit enemy;
         int enemy_id;
 
-        // If any in range, just attack them.
-        if ((attackable_enemies.size() > 0)) {
-            enemy = chooseLowestHpEnemy(attackable_enemies);
-            enemy_id = enemy.id();
-            tryAttack(id, enemy_id);
+        // Always attack first, no point in not (unless mage)
 
-            // if low hp, run after attacking.
-            if (unit.unitType()== UnitType.Ranger && unit.health() < BotRanger.LOW_HP) {
-                Nav.moveTo(id, unit.location().mapLocation().directionTo(enemy.location().mapLocation()));
-            }
+        // if should atk, DO!
+        if (attack(unit, attackable_enemies)) {
+            retreat(unit);      // TODO have logic for when to retreat
             return;
-
-            // if I can see enemies but not in range, try and get close enough to attack
         }
 
-        // should be part of the ranger code at some point
+        // if low hp, run after attacking.
+        //if (unit.unitType()== UnitType.Ranger && unit.health() < BotRanger.LOW_HP) {
+        //    Nav.moveTo(id, unit.location().mapLocation().directionTo(enemy.location().mapLocation()));
+        //}
+        if (engage(unit, viewable_enemies)) {
+            return;
+        }
 
-        if ((viewable_enemies.size() > 0)) {
-            enemy = chooseClosestEnemy(unit, viewable_enemies);
+
+        Nav.moveToEnemyBase(unit.id());
+        return;
+    }
+
+    public static boolean engage(Unit unit, VecUnit enemies) {
+
+        int id = unit.id();
+
+        if ((enemies.size() > 0)) {
+            Unit enemy = chooseClosestEnemy(unit, enemies);
 
             // if you're a ranger, sit a second
-            if (unit.unitType()== UnitType.Ranger && unit.health() < BotRanger.LOW_HP && unit.attackHeat()>=10) {
-                return;
+            if (unit.unitType() == UnitType.Ranger && unit.health() < BotRanger.LOW_HP && unit.attackHeat() >= 10) {
+                return true;
             }
-            Nav.tryGoToMapLocation(id, enemy.location().mapLocation());
-            tryAttack(id, enemy.id());
-            return;
 
-        } else {
-            Nav.moveToEnemyBase(id);
+            // go towards the enemy and try to attack the closest enemy hopefully
+            Nav.tryGoToMapLocation(id, enemy.location().mapLocation());
+            tryAttack(id, enemy.id());      // could use attack - but might be too expensive
+
+            return true;
         }
-        return;
+        return false;
+    }
+
+
+    public static boolean attack(Unit unit, VecUnit enemies) {
+
+        int id = unit.id();
+        if ((enemies.size() > 0)) {
+            Unit enemy = chooseLowestHpEnemy(enemies);
+            int enemy_id = enemy.id();
+            return (tryAttack(id, enemy_id));
+        }
+        return false;
     }
 
     // tries to attack an enemy
@@ -113,25 +132,5 @@ public class AttackingBot extends Bot{
         return priority_enemy;
     }
 
-    public static Unit chooseClosestEnemy(Unit unit, VecUnit enemies) {
 
-        // some shitty ass finding of the prio unit
-        Unit priority_enemy = enemies.get(0);
-        float priority_dist = unit.location().mapLocation().distanceSquaredTo(priority_enemy.location().mapLocation());
-        Unit curr_enemy;
-        float curr_dist;
-
-        for (int i=1; i<enemies.size(); i++) {
-            curr_enemy = enemies.get(i);
-
-            // compares the distance between the unit and the enemy with the old closest
-            if ((curr_dist = unit.location().mapLocation().distanceSquaredTo(curr_enemy.location().mapLocation()))
-                    < priority_dist) {
-                priority_enemy = curr_enemy;
-                priority_dist = curr_dist;
-            }
-
-        }
-        return priority_enemy;
-    }
 }

@@ -16,13 +16,11 @@ public class BotWorker extends Bot{
 
     public static void update(Unit unit) {
 
+        // TODO: if being attacked. Send a message and stuff
         int id = unit.id();
-
-       // Nav.wander(id);
 
         // 1. Checks if any nearby blueprints should be built
         if (tryToBuild(unit)) {
-            //System.out.println("Building...");
             return;
         }
 
@@ -86,6 +84,8 @@ public class BotWorker extends Bot{
     //TODO: worker run code
 
     public static boolean tryToBlueprintFactory(int id) {
+
+        //System.out.println("Trying to blueprint Factory");
         // TODO making sure that I choose a good factory spot
         // where does not block friendly units, not on minerals
 
@@ -120,7 +120,8 @@ public class BotWorker extends Bot{
     // TODO change random code so that it doesn't always start North
     public static boolean tryToReplicate(Unit unit) {
 
-        if ((Globals.prev_workers < Globals.req_workers) || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
+        System.out.println((Globals.prev_workers < Globals.req_workers));
+        if ((Globals.prev_workers >= Globals.req_workers) || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
             return false;
         }
         for (Direction dir : Direction.values()) {

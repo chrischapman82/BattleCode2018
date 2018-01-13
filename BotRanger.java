@@ -22,6 +22,7 @@ public class BotRanger extends AttackingBot {
 
     }
 
+    // TODO: try to micro
     public static boolean tryToMicro(Unit unit) {
 
         // run away from Knights
@@ -29,8 +30,11 @@ public class BotRanger extends AttackingBot {
         return false;
     }
 
+    // TODO: change targeting to do with min range
 
     // TODO: I'd like to add a better score at one point
+
+
     //public static int enemyScore(Unit enemy) {
 ///    }
 
