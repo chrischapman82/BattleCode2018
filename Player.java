@@ -22,7 +22,7 @@ public class Player {
 
         // checking out whether everything's working!
         Globals.printMapInfo();
-        System.out.format("Enemy at: %s", Globals.enemy_init_loc.toString());
+        //System.out.format("Enemy at: %s", Globals.enemy_init_loc.toString()); // currently only for earth
 
         //TODO: Create an array at the start to find all locations w/ kryptonite
         //PlanetMap map = gc.startingMap(Planet.Earth);
@@ -92,6 +92,7 @@ public class Player {
         return Direction.values()[rand.nextInt(Globals.NUM_DIRECTIONS)];
     }
 
+    // just putting all the methods here that I'd like to remember w/out having to sift thru the API
     public static void rememberingMethods() {
 
         // MapLocation is a data structure you'll use a lot.
@@ -104,7 +105,13 @@ public class Player {
         //System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
         //System.out.println(bc.bcDirectionRotateLeft(Direction.North));
 
-        System.out.format("%d %d", Globals.earth_width, Globals.earth_width);
-    }
+        System.out.format("%d %d", Globals.planet_width, Globals.planet_height);
 
+        // docker commands
+        /*
+        docker stop $(docker ps -a -q)
+        docker rm $(docker ps -a -q)
+        docker ps -as
+        */
+    }
 }

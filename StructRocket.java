@@ -10,6 +10,8 @@ public class StructRocket {
         //if (Player.gc.canLaunchRocket(rocket.id())) {
 
         //}
+
+
         return false;
     }
 

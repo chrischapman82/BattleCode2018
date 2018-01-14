@@ -2,6 +2,9 @@ import bc.*;
 
 import java.util.ArrayList;
 
+
+    // NO NEED FOR: GOT BFS NOW
+/*
 public class Pathing {
 
     public ArrayList<Direction> path;
@@ -9,7 +12,7 @@ public class Pathing {
     public long closest;
     public MapLocation start;
     public MapLocation end;
-    public PlanetMap map;
+    public PlanetMap map = Globals.planet;
     public MapLocation curr_loc;
     public Direction curr_dir;
 
@@ -24,11 +27,11 @@ public class Pathing {
 
     }
 
+    /*
     // initialising necessary values
     // Based off of code by MaxMann
     public void bugPathInit(MapLocation start_loc, MapLocation end_loc) {
 
-        map = Player.gc.startingMap(Planet.Earth);
         start = start_loc;
         end = end_loc;
         closest = start.distanceSquaredTo(start);
@@ -41,7 +44,7 @@ public class Pathing {
         for (int i = 0; i < map.getHeight() * map.getWidth(); i++) {
             // TODO fix for API too
             // hopefully makes this faster
-            passable.add(map.isPassableTerrainAt(new MapLocation(Planet.Earth, getX(i), getY(i))) != 0);
+            //passable.add(map.isPassableTerrainAt(new MapLocation(planet, getX(i), getY(i))) != 0);
         }
     }
 
@@ -114,4 +117,4 @@ public class Pathing {
             }
         });
     }*/
-}
+//}*/

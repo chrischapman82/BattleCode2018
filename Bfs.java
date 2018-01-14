@@ -30,7 +30,7 @@ public class Bfs {
         dirFrom = new ArrayList<>();    // direction list
 
         // setting all initial direction to null
-        for (int i = 0; i < Globals.earth_size; i++) {
+        for (int i = 0; i < Globals.planet_size; i++) {
             dirFrom.add(null);
         }
         dirFrom.set(Tile.getIndex(end), null);          // may not be needed
@@ -63,10 +63,10 @@ public class Bfs {
      *  on the map, !visited, adjacent to the prev tile and can be moved onto
     */
     public boolean isOpen(MapLocation curr, MapLocation dest) {
-    return (Globals.earth.onMap(dest)                   &&      // is it on the map
+    return (Globals.planet.onMap(dest)                   &&      // is it on the map
             dirFrom.get(Tile.getIndex(dest)) == null    &&      // has the tile been visited
             curr.isAdjacentTo(dest))                    &&      // Are we actually nex tot the dest
-            !(Globals.earth.isPassableTerrainAt(dest) == 0);    // Can be move onto?
+            !(Globals.planet.isPassableTerrainAt(dest) == 0);    // Can be move onto?
     }
 
 
@@ -83,7 +83,7 @@ public class Bfs {
         queue.add(end);
         cameFrom = new ArrayList<>();
 
-        for (int i=0; i<Globals.earth_size;i++) {
+        for (int i=0; i<Globals.planet_size;i++) {
             cameFrom.add(null);
         }
         cameFrom.set(Tile.getIndex(end), null);
@@ -99,7 +99,7 @@ public class Bfs {
                 next = curr.add(dir);
 
                 if (isOpen(curr, next)) {
-                    //System.out.println(Globals.earth.isPassableTerrainAt(next));
+                    //System.out.println(Globals.planet.isPassableTerrainAt(next));
                     //System.out.println(next.getX());
                     queue.add(next);
                     cameFrom.set(Tile.getIndex(next), curr);
@@ -130,10 +130,10 @@ public class Bfs {
     // checks whether can move to the node in question.
 
     /*public boolean isOpen(MapLocation curr, MapLocation dest) {
-        return (Globals.earth.onMap(dest)                   &&      // is it on the map
+        return (Globals.planet.onMap(dest)                   &&      // is it on the map
                 cameFrom.get(Tile.getIndex(dest)) == null   &&      // has the tile been visited
                                 curr.isAdjacentTo(dest))    &&      // Are we actually nex tot the dest
-                                !(Globals.earth.isPassableTerrainAt(dest) == 0);
+                                !(Globals.planet.isPassableTerrainAt(dest) == 0);
     }*/
 
 /*
@@ -152,7 +152,7 @@ public class Bfs {
     public void printBfs() {
 
         MapLocation curr;
-        for (int i=0; i<Globals.earth_size; i++) {
+        for (int i=0; i<Globals.planet_size; i++) {
             curr = cameFrom.get(i);
             if (curr == null) {
                 System.out.format("-----|");
@@ -160,7 +160,7 @@ public class Bfs {
                 System.out.format("%2d,%2d|", cameFrom.get(i).getX(), cameFrom.get(i).getY());
             }
 
-            if (i%Globals.earth_width == Globals.earth_width-1) {
+            if (i%Globals.planet_width == Globals.planet_width-1) {
                 System.out.println("");
             }
         }
@@ -194,7 +194,7 @@ public class Bfs {
         curr_points = new ArrayList<>();
         state = State.SPREAD;
         map = new ArrayList<>();
-        planet_map = Player.gc.startingMap(Planet.Earth);
+        planet_map = Player.gc.startingMap(Planet.planet);
         path = new ArrayList<>();
 
         int map_size = (int)(planet_map.getHeight()*planet_map.getWidth());

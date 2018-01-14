@@ -57,6 +57,12 @@ public class BotWorker extends Bot{
     // If yes, either builds the building, or looks for a good spot for it
     public static boolean tryToCreateBuilding(int id, UnitType building) {
 
+
+        // can't build on mars
+        if (Globals.planet_name.equals(Planet.Mars)) {
+            return false;
+        }
+
         // checks if we need the given building
         if (building.equals(UnitType.Factory)) {
             if (Globals.prev_factories < Globals.req_factories) {
@@ -175,6 +181,9 @@ public class BotWorker extends Bot{
     // returns true if is building.
     public static boolean tryToBuild(Unit unit) {
 
+        if (Globals.planet_name.equals(Planet.Mars)) {
+            return false;
+        }
         // checks right next to the player
         VecUnit nearby = Player.gc.senseNearbyUnits(unit.location().mapLocation(), 5);
 
@@ -197,8 +206,8 @@ public class BotWorker extends Bot{
         return false;
     }
 
+    // Mines any ore next to the worker
     public static boolean tryToMine(int id) {
-
         //System.out.println("Trying to mine");
         //checks if any ore next to the worker:
         Direction candidate_dir = Player.getRandomDir();

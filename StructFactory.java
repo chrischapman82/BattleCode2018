@@ -34,8 +34,14 @@ public class StructFactory {
 
         int factory_id = factory.id();
 
+        Direction candidate_dir;
         // shitty fix so that it's facing towards the enemy as the first option
-        Direction candidate_dir = bc.bcDirectionRotateRight(Nav.dirToMapLoc(factory, Globals.enemy_init_loc));
+        // != for null
+        if (Globals.enemy_init_loc != null) {
+            candidate_dir = bc.bcDirectionRotateRight(Nav.dirToMapLoc(factory, Globals.enemy_init_loc));
+        } else {
+            candidate_dir = Player.getRandomDir();
+        }
 
         // releases the garrisoned unit if a direction is available
         for (int i=0; i<Globals.NUM_DIRECTIONS; i++) {

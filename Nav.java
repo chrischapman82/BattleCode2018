@@ -22,10 +22,14 @@ public class Nav {
     public static boolean moveTo(int id, Direction dir) {
 
         Direction cand_dir;
-        if ((cand_dir = directions.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
-            tryMoveInDirection(id, cand_dir);
-            return true;
+
+        if (Globals.planet_name.equals(Planet.Earth)) {
+            if ((cand_dir = directions.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
+                tryMoveInDirection(id, cand_dir);
+                return true;
+            }
         }
+
         // try moving normally
         if (tryMoveInDirection(id, dir)) {
             return true;
@@ -35,12 +39,29 @@ public class Nav {
         Unit friend;
         MapLocation cand_loc = getMapLocFromId(id).add(dir);        // the location i'd like to check
 
-        if ((friend = getFriendlyUnitAtLocation(getMapLocFromId(id))) != null) {
+        if ((friend = getFriendlyMovableUnitAtLocation(getMapLocFromId(id))) != null) {
+
             if (politelyAskToMove(friend, dir)) {
                 moveTo(id, dir);
             }
         }
         return false;
+    }
+
+
+
+    // Checks if there is a friendly unit @ the map location that can move!
+
+    public static Unit getFriendlyMovableUnitAtLocation(MapLocation loc) {
+        Unit friend;
+
+        // is there a friendly unit at the map location
+        // And the unit is not a rocker or factory, return
+        if ((friend = getFriendlyUnitAtLocation(loc)) != null &&
+                !(friend.unitType().equals(UnitType.Factory) || friend.unitType().equals(UnitType.Rocket))) {
+            return friend;
+        }
+        return null;
     }
 
     // if friendly unit at the map loc, returns it.
@@ -50,7 +71,6 @@ public class Nav {
         if (Player.gc.hasUnitAtLocation(loc) && (friend = Player.gc.senseUnitAtLocation(loc)).team().equals(Globals.us)) {
             return friend;
         }
-
         return null;
     }
 
@@ -104,14 +124,15 @@ public class Nav {
         MapLocation unit_loc = unit.location().mapLocation();
         MapLocation candidate_loc = unit_loc.add(dir);
 
-        // checks if the location is blocked by terrain or off the map
-        if (!Globals.earth.onMap(candidate_loc) || Globals.earth.isPassableTerrainAt(candidate_loc) == 0) {
+        // checks if the location is blocked by terrain or off the map or is a building
+        if (Tile.isBlocked(candidate_loc)) {
             return false;
         }
 
+
         Unit friend;
-        if ((getFriendlyUnitAtLocation(unit_loc.add(dir))) != null) {
-            friend = getFriendlyUnitAtLocation(unit_loc.add(dir));
+        if ((friend = getFriendlyMovableUnitAtLocation(unit_loc.add(dir))) != null) {
+
             if (rudelyAskToMove(friend, dir)) {
                 return tryMoveForward(unit.id(), dir);
             }

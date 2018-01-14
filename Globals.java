@@ -10,15 +10,16 @@ public class Globals {
 
     // storing some mapLocations
     public static MapLocation enemy_init_loc;
-    public static PlanetMap earth;
+    public static Planet planet_name;           // PlanetMap planet is much more useful so calling it planet
+    public static PlanetMap planet;             // the mpa of the planet that this player is playing on
 
     public static int req_factories = 2;  // I want one as soon as ossible
     public static int NUM_DIRECTIONS = 8;
 
     // map dimensions:
-    public static int earth_width;
-    public static int earth_height;
-    public static int earth_size;
+    public static int planet_width;
+    public static int planet_height;
+    public static int planet_size;
 
     public static int num_workers;
     public static int num_factories;
@@ -54,36 +55,41 @@ public class Globals {
             them = Team.Red;
         }
 
-        // initialising the earth
-        earth = Player.gc.startingMap(Planet.Earth);
-        //earth.initialKarboniteAt();
+        // initialising the planet
 
-        earth_height = (int)earth.getHeight();
-        earth_width = (int)earth.getWidth();
-        earth_size = earth_height*earth_width;
+        //planet =
+
+        planet_name = Player.gc.planet();
+        planet = Player.gc.startingMap(Player.gc.planet());
+        //planet.initialKarboniteAt();
+
+        planet_height = (int)planet.getHeight();
+        planet_width = (int)planet.getWidth();
+        planet_size = planet_height*planet_width;
 
         enemy_init_loc = findInitEnemyLoc();
         priorityEnemies = new ArrayList<>();
 
 
         // time to init bfs:
-        Nav.initNavDirections(enemy_init_loc);
 
+        if (Player.gc.planet() == Planet.Earth) {
+            Nav.initNavDirections(enemy_init_loc);
+        } else {
+            Nav.initNavDirections(new MapLocation(Planet.Mars, 1, 1));
+        }
 
-        // will have O(1) lookup this way.
-        /*for (int i=0; i<earth_size; i++) {
-            if ((earth.initialKarboniteAt(new MapLocation(Planet.Earth, i%earth_width,i*earth_width))) == 1) {
-                initKarboniteSpots.add(true);
-            } else {
-                initKarboniteSpots.add(false);
-            }
-        }*/
     }
 
     // finds an initial location to go to.
     public static MapLocation findInitEnemyLoc() {
 
-        VecUnit all_units = earth.getInitial_units();
+        VecUnit all_units = planet.getInitial_units();
+
+        // basically for mars
+        if (all_units.size() == 0) {
+            return null;
+        }
         for (int i=0; i< all_units.size(); i++) {
             Unit curr_unit = all_units.get(i);
             if (curr_unit.team().equals(them)) {
@@ -164,7 +170,7 @@ public class Globals {
     // prints infromation about the map for debugging purposes
     public static void printMapInfo() {
         // print the width, height etc.
-        System.out.format("MAP INFO: width = %d, height = %d\n", earth_width, earth_height);
+        System.out.format("MAP INFO: width = %d, height = %d\n", planet_width, planet_height);
     }
 
 }
