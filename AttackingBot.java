@@ -13,26 +13,107 @@ public class AttackingBot extends Bot{
         Unit enemy;
         int enemy_id;
 
-        // Always attack first, no point in not (unless mage)
+        boolean out_numbered = isOutnumbered(unit, viewable_enemies);
+
+        // Always attack first, no point in not if can(unless mage)
 
         // if should atk, DO!
-        if (attack(unit, attackable_enemies)) {
-            retreat(unit);      // TODO have logic for when to retreat
+        attack(unit, attackable_enemies);
+
+        // if outnumbered, run away
+        if (out_numbered) {
+            retreat(unit);
             return;
         }
-
         // if low hp, run after attacking.
         //if (unit.unitType()== UnitType.Ranger && unit.health() < BotRanger.LOW_HP) {
         //    Nav.moveTo(id, unit.location().mapLocation().directionTo(enemy.location().mapLocation()));
         //}
+
+        // If I can see a bunch of enemies try to engage them
         if (engage(unit, viewable_enemies)) {
             return;
         }
 
-
         Nav.moveToEnemyBase(unit.id());
         return;
     }
+
+    // gauges whether we're outnumbered
+    public static boolean isOutnumbered(Unit unit, VecUnit visible_enemies) {
+
+        // if no enemies, then clearly not
+        if (visible_enemies.size() == 0) {
+            return false;
+        }
+
+        MapLocation unit_loc = unit.location().mapLocation();
+        Unit closest_attacking_enemy = visible_enemies.get(0);      // the closest enemy that can attack us
+        long closest_dist = Integer.MAX_VALUE;
+        int num_attacking_enemies = 0;
+        MapLocation closest_attacking_enemy_loc = closest_attacking_enemy.location().mapLocation();
+
+        UnitType type;
+        for (int i = 0; i < visible_enemies.size(); i++) {
+            Unit enemy = visible_enemies.get(i);
+
+            //TODO possible problems here if blueprint becomes a unit
+            if ((type = enemy.unitType()) != UnitType.Factory && type != UnitType.Worker && type != UnitType.Rocket) {
+                long distsq = enemy.location().mapLocation().distanceSquaredTo(unit_loc);
+
+                if (distsq <= enemy.attackRange()) {
+                    if (distsq < closest_dist) {
+                        closest_dist = distsq;
+                        closest_attacking_enemy = enemy;
+                    }
+                    num_attacking_enemies++;
+                }
+            }
+        }
+
+        closest_attacking_enemy_loc = closest_attacking_enemy.location().mapLocation();
+
+        if (num_attacking_enemies == 0) {
+            return false;
+        }
+
+        int num_attacking_allies = 0;
+        if (unit_loc.distanceSquaredTo(closest_attacking_enemy.location().mapLocation()) <= unit.attackRange()) {
+            num_attacking_allies++;
+        }
+
+        VecUnit visable_allies = getViewableAllies(unit);
+        for (int i=0; i<visable_allies.size(); i++) {
+            Unit ally = visable_allies.get(i);
+            if ((type = ally.unitType()) != UnitType.Factory && type != UnitType.Worker && type != UnitType.Rocket) {
+
+                long distsq = ally.location().mapLocation().distanceSquaredTo(closest_attacking_enemy_loc);
+
+                if (distsq <= ally.attackRange()) {
+                    num_attacking_allies++;
+                }
+            }
+        }
+
+        if (num_attacking_allies > num_attacking_enemies) {
+            return false;
+        }
+
+        if (num_attacking_allies == num_attacking_enemies) {
+            // if there's one, only fight if you have the same or more HP
+            if (num_attacking_enemies == 1) {
+
+                if (unit.health() >= closest_attacking_enemy.health()) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        // if we got to here, we're outnumbered!
+        return true;
+    }
+
 
     public static boolean engage(Unit unit, VecUnit enemies) {
 

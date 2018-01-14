@@ -17,12 +17,15 @@ public class BotWorker extends Bot{
     public static void update(Unit unit) {
 
         // TODO: if being attacked. Send a message and stuff
+        // TODO: Gathering Karbonite
         int id = unit.id();
 
-        // 1. Checks if any nearby blueprints should be built
+        // 1. Checks if should any blueprints can be built nearby. Builds them if yes
         if (tryToBuild(unit)) {
             return;
         }
+
+        // TODO retreat when being attacked
 
         //System.out.println(unit.abilityCooldown() >= 10);
         //System.out.println(unit.abilityCooldown());
@@ -32,17 +35,11 @@ public class BotWorker extends Bot{
         }
 
         // 3. Checks if I should and can build a factory,
-        if (Globals.prev_factories < Globals.req_factories && Player.gc.karbonite() >= bc.bcUnitTypeBlueprintCost(UnitType.Factory)) {
-
-            if (tryToBlueprintFactory(id)) {
-                return;
-            } else {
-                //TODO find a good factory spot
-                Nav.wander(id);
-                return;
-            }
+        if (tryToBuildFactory(id)) {
+            return;
         }
 
+        // 4. Tries to mine
         if (tryToMine(id)) {
             return;
         }
@@ -50,6 +47,30 @@ public class BotWorker extends Bot{
         // TODO: Find Karbonite
         findKarbonite(id);
         return;
+    }
+
+    // Trying to build a factory
+    // Checks if we can/should build a factory.
+    // If yes, either builds a factory, or finds a good spot for a factory
+    public static boolean tryToBuildFactory(int id) {
+
+        // See if we can/should build a factory
+        if (Globals.prev_factories < Globals.req_factories && Player.gc.karbonite() >= bc.bcUnitTypeBlueprintCost(UnitType.Factory)) {
+
+            // if we can/should, blueprint it!
+            if (tryToBlueprintFactory(id)) {
+                return true;
+
+            // if we should, but can't find a spot to place the factory
+            } else {
+                //TODO find a good factory spot!!! not too close to another factory
+                //  1. not blocking any exits (has room around it (Look in area, if there is room for one, send a message to the fellas
+                //      use this to get nearby workers to try to help!
+                Nav.wander(id);
+                return false;
+            }
+        }
+        return false;
     }
 
     // TODO: Find Karbonite, rather than just wandering w/out purpose
@@ -120,7 +141,6 @@ public class BotWorker extends Bot{
     // TODO change random code so that it doesn't always start North
     public static boolean tryToReplicate(Unit unit) {
 
-        System.out.println((Globals.prev_workers < Globals.req_workers));
         if ((Globals.prev_workers >= Globals.req_workers) || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
             return false;
         }

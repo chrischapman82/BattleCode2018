@@ -39,8 +39,11 @@ public class Bot extends Unit {
         return Player.gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), Globals.them);
     }
 
-    public static VecUnit getAttackableEnemies(Unit unit) {
+    public static VecUnit getViewableAllies(Unit unit) {
+        return Player.gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), Globals.us);
+    }
 
+    public static VecUnit getAttackableEnemies(Unit unit) {
         return Player.gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.attackRange(), Globals.them);
     }
 

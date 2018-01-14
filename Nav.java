@@ -71,6 +71,9 @@ public class Nav {
     // for trying to retreat the given unit in the given direction
     public static boolean tryToRetreat(Unit unit, Direction dir) {
 
+        if (unit.movementHeat() >= 10) {
+            return false;
+        }
         if (tryMoveDirAndPushAlly(unit, dir)) {
             return true;
         }
@@ -123,7 +126,7 @@ public class Nav {
 
     // Unit tries to move in the given direction, asking others to move if required
     public static boolean rudelyAskToMove(Unit ally_unit, Direction dir) {
-        if (ally_unit.movementHeat() >= 10) {
+        if (ally_unit.movementHeat() >= 10) {      // ADD if can move (for factories etc.)
             return false;
         }
 
