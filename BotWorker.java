@@ -34,14 +34,20 @@ public class BotWorker extends Bot{
             return;
         }
 
+        //System.out.println(Globals.req_factories);
+        //System.out.println(Globals.prev_factories);
+        //System.out.println(Globals.num_factories);
         // 3. Checks if I should and can build a factory,
+
+        /*
         if (tryToCreateBuilding(id, UnitType.Factory)) {
+
             return;
         }
 
         if (tryToCreateBuilding(id, UnitType.Rocket)) {
             return;
-        }
+        }*/
 
         // 4. Tries to mine
         if (tryToMine(id)) {
@@ -49,7 +55,7 @@ public class BotWorker extends Bot{
         }
 
         // TODO: Find Karbonite
-        findKarbonite(id);
+        findKarbonite(unit);
         return;
     }
 
@@ -64,14 +70,10 @@ public class BotWorker extends Bot{
         }
 
         // checks if we need the given building
-        if (building.equals(UnitType.Factory)) {
-            if (Globals.prev_factories < Globals.req_factories) {
-                return false;
-            }
-        } else if (building.equals(UnitType.Rocket)){
-            if (Globals.prev_rockets < Globals.req_rockets) {
-                return false;
-            }
+        if (building.equals(UnitType.Factory) && Globals.prev_factories >= Globals.req_factories) {
+            return false;
+        } else if (building.equals(UnitType.Rocket) && Globals.prev_rockets >= Globals.req_rockets){
+            return false;
         }
 
         // can I afford it
@@ -92,7 +94,47 @@ public class BotWorker extends Bot{
 
     // TODO: Find Karbonite, rather than just wandering w/out purpose
     // Only valid on Earth
-    public static void findKarbonite(int id) {
+    // TODO WTF
+    public static void findKarbonite(Unit unit) {
+
+        //System.out.println(Globals.karboniteMap);
+        //System.out.println(Globals.karbonite_left);
+        // VERY COMPUTATIONALLY HEAVY!
+        // there's nothing left to do
+        if (!Globals.karbonite_left) {
+            return;
+        }
+
+        // there's nothing left!
+        if (Globals.karboniteMap.size() == 0) {
+            System.out.println("ALL KARBONITE IS NOW GONE");
+            Globals.karbonite_left = false;
+        }
+
+        // finds the closest karbonite
+        MapLocation unit_loc = unit.location().mapLocation();
+        long closest_dist = Integer.MAX_VALUE;
+        long curr_dist;
+        MapLocation curr_loc;
+        MapLocation closest_loc = Globals.karboniteMap.get(0);
+        for (int i=0; i<Globals.karboniteMap.size(); i++) {
+
+            curr_loc = Globals.karboniteMap.get(i);
+            curr_dist = unit_loc.distanceSquaredTo(curr_loc);
+
+            if (curr_dist < closest_dist) {
+                closest_dist = curr_dist;
+                closest_loc = curr_loc;
+            }
+        }
+
+        if (Player.gc.canSenseLocation(closest_loc) && !(Player.gc.karboniteAt(closest_loc) > 0)) {
+            Globals.karboniteMap.remove(closest_loc);
+            findKarbonite(unit);                        // ewww
+        }
+        Nav.moveTo(unit.id(), closest_loc);
+        return;
+
         /*MapLocation loc = unit.location().mapLocation();
         // update if there's no karbonite
         int x = loc.getX();
@@ -117,7 +159,6 @@ public class BotWorker extends Bot{
             num_reps++;
         }*/
 
-        Nav.wander(id);
     }
     //TODO: worker run code
 
@@ -215,8 +256,10 @@ public class BotWorker extends Bot{
             candidate_dir = bc.bcDirectionRotateLeft(candidate_dir);
             if (Player.gc.canHarvest(id, candidate_dir)) {
                 Player.gc.harvest(id, candidate_dir);
+                Globals.karboniteMap.remove(Nav.getMapLocFromId(id).add(candidate_dir));          // remove doesn't error if not in there!
+                System.out.println(Nav.getMapLocFromId(id).add(candidate_dir));
+                System.out.println(Globals.karboniteMap.contains(Nav.getMapLocFromId(id).add(candidate_dir)));
                 //System.out.println("Mining...");
-
 
                 // remove the spot from the map
                 //Globals.initKarboniteSpots.set(Tile.getIndex(Nav.getMapLocFromId(id).add(candidate_dir)),false);

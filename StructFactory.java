@@ -7,12 +7,12 @@ public class StructFactory {
         releaseGarrisonUnits(factory);
 
         // should always produce units. No point in not!
+        //if (produceRobot(factory.id(), UnitType.Ranger)) {
+            //Globals.num_rangers++;
+            //return;
+        //}
 
-
-        if (produceRobot(factory.id(), UnitType.Ranger)) {
-            Globals.num_rangers++;
-            return;
-        }
+        // code to do different for each
         /*if (factory.team() == Team.Blue) {
 
             if (produceRobot(factory.id(), UnitType.Knight)) {
@@ -63,6 +63,7 @@ public class StructFactory {
         if ((Player.gc.canProduceRobot(factory_id, unit_type))) {
             Player.gc.produceRobot(factory_id, unit_type);
             System.out.format("Producing %s\n", unit_type);
+            // TODO count these?
             return true;
         }
 

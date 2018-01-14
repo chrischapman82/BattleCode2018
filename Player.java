@@ -44,6 +44,9 @@ public class Player {
                     Unit unit = units.get(i);
                     //System.out.format("%s reporting in\n", unit.unitType());
 
+                    UnitType unit_type = unit.unitType();
+                    Globals.countUnit(unit_type);
+
                     // if the unit is garrisoned or in a rocket. Do nothing as it can't do anything.
                     if (unit.location().isInGarrison() && !unit.unitType().equals(UnitType.Factory)) {
                         //System.out.println("Is garrisoned, do nothing");
@@ -51,8 +54,7 @@ public class Player {
                     }
 
                     // Getting the type of unit and tracking how many
-                    UnitType unit_type = unit.unitType();
-                    Globals.countUnit(unit_type);
+
 
                     // switch was being real dodgy so I guess if statements it is
                     // Changing for each type of unit and delegating to subclasses

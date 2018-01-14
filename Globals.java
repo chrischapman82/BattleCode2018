@@ -13,6 +13,8 @@ public class Globals {
     public static Planet planet_name;           // PlanetMap planet is much more useful so calling it planet
     public static PlanetMap planet;             // the mpa of the planet that this player is playing on
 
+    public static MapLocation landingLoc;
+
     public static int req_factories = 2;  // I want one as soon as ossible
     public static int NUM_DIRECTIONS = 8;
 
@@ -25,6 +27,7 @@ public class Globals {
     public static int num_factories;
     public static int num_knights;
     public static int num_rangers;
+
 
     // number of each for the previous turn.
     // start high will only last 1 turn. Used to make sure that mass replication doesn't happen first round
@@ -40,9 +43,15 @@ public class Globals {
     public static boolean need_workers = false;
     public static boolean needFactory = false;
 
-    public static ArrayList<Boolean> initKarboniteSpots;
+
+    public static int startBuildingRocketsRound = 500;      // should this be final
+
+    //public static ArrayList<Boolean> karboniteMap;
+    public static ArrayList<MapLocation> karboniteMap;
+    public static boolean karbonite_left = true;
 
     public static ArrayList<Unit> priorityEnemies;
+    public static boolean timeToGo = true;      // FOR THE ROCKET
 
     public static void init() {
 
@@ -57,15 +66,17 @@ public class Globals {
 
         // initialising the planet
 
-        //planet =
-
+        // Setting up the planet values for easy access
         planet_name = Player.gc.planet();
         planet = Player.gc.startingMap(Player.gc.planet());
-        //planet.initialKarboniteAt();
-
         planet_height = (int)planet.getHeight();
         planet_width = (int)planet.getWidth();
         planet_size = planet_height*planet_width;
+
+        // init the karbonite map
+        karboniteMap = Map.createKarboniteLocMap(planet);
+        //System.out.println("*****");
+        //System.out.println(planet.initialKarboniteAt(new MapLocation(Planet.Earth,0,8)));
 
         enemy_init_loc = findInitEnemyLoc();
         priorityEnemies = new ArrayList<>();
