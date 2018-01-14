@@ -7,10 +7,10 @@ public class StructFactory {
         releaseGarrisonUnits(factory);
 
         // should always produce units. No point in not!
-        //if (produceRobot(factory.id(), UnitType.Ranger)) {
-            //Globals.num_rangers++;
-            //return;
-        //}
+        if (produceRobot(factory.id(), UnitType.Ranger)) {
+            Globals.num_rangers++;
+            return;
+        }
 
         // code to do different for each
         /*if (factory.team() == Team.Blue) {

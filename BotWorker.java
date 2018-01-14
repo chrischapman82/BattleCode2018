@@ -39,7 +39,7 @@ public class BotWorker extends Bot{
         //System.out.println(Globals.num_factories);
         // 3. Checks if I should and can build a factory,
 
-        /*
+
         if (tryToCreateBuilding(id, UnitType.Factory)) {
 
             return;
@@ -47,7 +47,7 @@ public class BotWorker extends Bot{
 
         if (tryToCreateBuilding(id, UnitType.Rocket)) {
             return;
-        }*/
+        }
 
         // 4. Tries to mine
         if (tryToMine(id)) {
@@ -55,7 +55,8 @@ public class BotWorker extends Bot{
         }
 
         // TODO: Find Karbonite
-        findKarbonite(unit);
+        Nav.wander(id);
+        //findKarbonite(unit);
         return;
     }
 

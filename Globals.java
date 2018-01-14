@@ -43,7 +43,6 @@ public class Globals {
     public static boolean need_workers = false;
     public static boolean needFactory = false;
 
-
     public static int startBuildingRocketsRound = 500;      // should this be final
 
     //public static ArrayList<Boolean> karboniteMap;
@@ -89,7 +88,6 @@ public class Globals {
         } else {
             Nav.initNavDirections(new MapLocation(Planet.Mars, 1, 1));
         }
-
     }
 
     // finds an initial location to go to.
