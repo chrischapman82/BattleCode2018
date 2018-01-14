@@ -35,7 +35,11 @@ public class BotWorker extends Bot{
         }
 
         // 3. Checks if I should and can build a factory,
-        if (tryToBuildFactory(id)) {
+        if (tryToCreateBuilding(id, UnitType.Factory)) {
+            return;
+        }
+
+        if (tryToCreateBuilding(id, UnitType.Rocket)) {
             return;
         }
 
@@ -49,28 +53,35 @@ public class BotWorker extends Bot{
         return;
     }
 
-    // Trying to build a factory
-    // Checks if we can/should build a factory.
-    // If yes, either builds a factory, or finds a good spot for a factory
-    public static boolean tryToBuildFactory(int id) {
+    // Worker tries to build a building
+    // If yes, either builds the building, or looks for a good spot for it
+    public static boolean tryToCreateBuilding(int id, UnitType building) {
 
-        // See if we can/should build a factory
-        if (Globals.prev_factories < Globals.req_factories && Player.gc.karbonite() >= bc.bcUnitTypeBlueprintCost(UnitType.Factory)) {
-
-            // if we can/should, blueprint it!
-            if (tryToBlueprintFactory(id)) {
-                return true;
-
-            // if we should, but can't find a spot to place the factory
-            } else {
-                //TODO find a good factory spot!!! not too close to another factory
-                //  1. not blocking any exits (has room around it (Look in area, if there is room for one, send a message to the fellas
-                //      use this to get nearby workers to try to help!
-                Nav.wander(id);
+        // checks if we need the given building
+        if (building.equals(UnitType.Factory)) {
+            if (Globals.prev_factories < Globals.req_factories) {
+                return false;
+            }
+        } else if (building.equals(UnitType.Rocket)){
+            if (Globals.prev_rockets < Globals.req_rockets) {
                 return false;
             }
         }
-        return false;
+
+        // can I afford it
+        if (Player.gc.karbonite() < bc.bcUnitTypeBlueprintCost(building)) {
+            return false;
+        }
+
+        // alright can we blueprint
+        if (tryToBlueprintBuilding(id, UnitType.Factory)) {
+            return true;
+        }
+
+        // this means that we should wander off to try and find a good spot
+        //TODO find a good factory spot!!! not too close to another factory
+        Nav.wander(id);
+        return true;
     }
 
     // TODO: Find Karbonite, rather than just wandering w/out purpose
@@ -104,14 +115,14 @@ public class BotWorker extends Bot{
     }
     //TODO: worker run code
 
-    public static boolean tryToBlueprintFactory(int id) {
+    public static boolean tryToBlueprintBuilding(int id, UnitType building) {
 
         //System.out.println("Trying to blueprint Factory");
         // TODO making sure that I choose a good factory spot
         // where does not block friendly units, not on minerals
 
         // check if I have enough money
-        if (Player.gc.karbonite() < bc.bcUnitTypeBlueprintCost(UnitType.Factory)) {
+        if (Player.gc.karbonite() < bc.bcUnitTypeBlueprintCost(building)) {
             return false;
         }
 
@@ -119,13 +130,18 @@ public class BotWorker extends Bot{
             //TODO: Don't place on ores?
 
             //System.out.println("Looking for a place to put the factory");
-            if (Player.gc.canBlueprint(id, UnitType.Factory, dir)) {
+            if (Player.gc.canBlueprint(id, building, dir)) {
 
                 //System.out.println("Placing Factory blueprint.");
-                Player.gc.blueprint(id, UnitType.Factory, dir);
+                Player.gc.blueprint(id, building, dir);
                 // am I allowed to build straight away?
                 //System.out.println("Factory blueprint placed.");
-                Globals.prev_factories++;
+                if (building == UnitType.Factory) {
+                    Globals.prev_factories++;
+                } else if (building == UnitType.Rocket) {
+                    Globals.prev_rockets++;
+                }
+
                 return true;
             }
         }
@@ -178,7 +194,6 @@ public class BotWorker extends Bot{
                 return true;
             }
         }
-
         return false;
     }
 
@@ -202,7 +217,6 @@ public class BotWorker extends Bot{
         return false;
     }
     //TODO: move towards other karbonite rather than just wander
-
 
 
 }

@@ -29,10 +29,12 @@ public class Globals {
     // start high will only last 1 turn. Used to make sure that mass replication doesn't happen first round
     public static int prev_workers = 100;
     public static int prev_factories = 100;
+    public static int prev_rockets = 100;
     public static int prev_knights = 100;
     public static int prev_rangers = 100;
 
     public static int req_workers = 4;
+    public static int req_rockets = 0;
 
     public static boolean need_workers = false;
     public static boolean needFactory = false;
