@@ -1,6 +1,6 @@
 import bc.*;
 
-public class StructFactory {
+public class StructFactory extends Bot{
 
     public static void update(Unit factory) {
 
@@ -13,7 +13,9 @@ public class StructFactory {
         }
 
         // code to do different for each
-        /*if (factory.team() == Team.Blue) {
+
+        /*
+        if (factory.team() == Team.Blue) {
 
             if (produceRobot(factory.id(), UnitType.Knight)) {
                 return;
@@ -38,17 +40,31 @@ public class StructFactory {
         // shitty fix so that it's facing towards the enemy as the first option
         // != for null
         if (Globals.enemy_init_loc != null) {
-            candidate_dir = bc.bcDirectionRotateRight(Nav.dirToMapLoc(factory, Globals.enemy_init_loc));
+            candidate_dir = bc.bcDirectionRotateRight(Nav.dirToMapLoc(factory, Globals.enemy_init_loc.get(0)));
         } else {
             candidate_dir = Player.getRandomDir();
         }
 
         // releases the garrisoned unit if a direction is available
+        Unit friend;
         for (int i=0; i<Globals.NUM_DIRECTIONS; i++) {
             candidate_dir = bc.bcDirectionRotateLeft(candidate_dir);
+
+
             if (Player.gc.canUnload(factory_id, candidate_dir)) {
                 Player.gc.unload(factory_id, candidate_dir);
                 return true;
+            }
+
+            // if there's a friendly unit there. Tell them to move
+            if (Player.gc.hasUnitAtLocation(Nav.getMapLocFromId(factory_id)) &&
+                    (friend = Player.gc.senseUnitAtLocation(Nav.getMapLocFromId(factory_id).add(candidate_dir))).team() == factory.team()) {
+                if (Nav.politelyAskToMove(friend, candidate_dir) && Player.gc.canUnload(factory_id, candidate_dir)) {
+                    Player.gc.unload(factory_id, candidate_dir);
+                    //Nav.moveToEnemyBase(Player.gc.senseUnitAtLocation(Nav.getMapLocFromId(factory_id).add(candidate_dir)).id());
+                    return true;
+                }
+
             }
         }
 

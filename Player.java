@@ -4,7 +4,11 @@ import bc.*;
 
 import java.util.Random;
 
+
+
 public class Player {
+
+    public static Random rand = new Random(178);
 
     // The class that controls everything!
 
@@ -30,6 +34,7 @@ public class Player {
 
         while (true) {
             System.out.println("Current round: "+gc.round());
+            Debug.getTimeLeft();    // gets teh time left
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
             VecUnit units = gc.myUnits();
 
@@ -89,7 +94,6 @@ public class Player {
     public static Direction getRandomDir() {
         //System.out.println("Getting random direction");
         // fairly sure this isn't random. In fact it's super unlikely to be the last value
-        Random rand = new Random(178);
         //System.out.format("rand = %s\n", rand);
         return Direction.values()[rand.nextInt(Globals.NUM_DIRECTIONS)];
     }

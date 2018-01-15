@@ -10,18 +10,54 @@ public class AttackingBot extends Bot{
         VecUnit attackable_enemies = getAttackableEnemies(unit);
         VecUnit viewable_enemies = getViewableEnemies(unit);
 
+        // magic numbers I LOVE THEM
+        VecUnit nearby_allies = getViewableAlliesInRange(unit, 10);
+
         Unit enemy;
         int enemy_id;
-
         boolean out_numbered = isOutnumbered(unit, viewable_enemies);
+
+        // if i have no mates
+
+
+        int nearby_attacking_allies = 0;
+        for (int i=0; i<nearby_allies.size(); i++) {
+            if (Bot.isAttackingBot(nearby_allies.get(i).unitType())) {
+                nearby_attacking_allies++;
+            }
+        }
+
+        // travel as a group of at least 3!
+        if (unit.team() == Team.Blue && nearby_attacking_allies <= 3) {
+            // wait homie
+            attack(unit, attackable_enemies);
+
+            if (out_numbered) {
+                retreat(unit);
+                return;
+                // do nothing!
+            }
+            return;
+        }
+
 
         // Always attack first, no point in not if can(unless mage)
 
         // if should atk, DO!
-        attack(unit, attackable_enemies);
+
+        if (attack(unit, attackable_enemies)) {
+
+            if (out_numbered) {
+                retreat(unit);
+                return;
+            } else {
+                return;
+            }
+        }
 
         // if outnumbered, run away
         if (out_numbered) {
+            System.out.println("I am outnumbered");
             retreat(unit);
             return;
         }
@@ -61,6 +97,7 @@ public class AttackingBot extends Bot{
             if ((type = enemy.unitType()) != UnitType.Factory && type != UnitType.Worker && type != UnitType.Rocket) {
                 long distsq = enemy.location().mapLocation().distanceSquaredTo(unit_loc);
 
+                // TODO only really works for range atm
                 if (distsq <= enemy.attackRange()) {
                     if (distsq < closest_dist) {
                         closest_dist = distsq;
@@ -139,13 +176,19 @@ public class AttackingBot extends Bot{
 
     public static boolean attack(Unit unit, VecUnit enemies) {
 
-
         // hacky fix atm
+        Unit enemy;
         int id = unit.id();
         if ((enemies.size() > 0)) {
 
             // hacky fix atm for Rangers not being able to attack if an enemy is in meelee range
             if (unit.unitType() == UnitType.Ranger) {   // TODO: FIX
+
+                // Tries to attack the lowest hp enemy!
+                if (tryAttack(id, chooseLowestHpEnemy(enemies).id())) {
+                    return true;
+                }
+                // otherwise just attacks whoever
                 for (int i=0; i < enemies.size(); i++) {
                     if (tryAttack(id, enemies.get(i).id())) {
                         return true;
@@ -153,7 +196,7 @@ public class AttackingBot extends Bot{
                 }
                 return false;
             }
-            Unit enemy = chooseLowestHpEnemy(enemies);
+            enemy = chooseLowestHpEnemy(enemies);
             int enemy_id = enemy.id();
             return (tryAttack(id, enemy_id));
         }
@@ -163,10 +206,13 @@ public class AttackingBot extends Bot{
     // tries to attack an enemy
     public static boolean tryAttack(int id, int enemy_id) {
 
+        // can I attack them?
         if (Player.gc.isAttackReady(id) && Player.gc.canAttack(id, enemy_id)) {
-            // can I attack them?
 
+            // Yes, check if I'm about to kill them
             checkIfEnemyKilled(Player.gc.unit(id), Player.gc.unit(enemy_id));
+
+            // Kill em boys
             Player.gc.attack(id, enemy_id);
             return true;
         }

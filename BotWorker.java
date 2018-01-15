@@ -70,9 +70,16 @@ public class BotWorker extends Bot{
             return false;
         }
 
-        // checks if we need the given building
+        // checks if we need the given building or make one if money is over 300!
         if (building.equals(UnitType.Factory) && Globals.prev_factories >= Globals.req_factories) {
-            return false;
+
+            // if we're floating a lot fo money, make another!
+            if (Player.gc.karbonite() >= 250) {
+                // continute
+            } else {
+                return false;
+            }
+
         } else if (building.equals(UnitType.Rocket) && Globals.prev_rockets >= Globals.req_rockets){
             return false;
         }
@@ -93,10 +100,17 @@ public class BotWorker extends Bot{
         return true;
     }
 
+
+    public static void findKarbonite(Unit unit) {
+
+
+        // I'd really like to do a BFS around me.
+    }
+
     // TODO: Find Karbonite, rather than just wandering w/out purpose
     // Only valid on Earth
     // TODO WTF
-    public static void findKarbonite(Unit unit) {
+    public static void findKarbonite2(Unit unit) {
 
         //System.out.println(Globals.karboniteMap);
         //System.out.println(Globals.karbonite_left);
@@ -208,14 +222,20 @@ public class BotWorker extends Bot{
         if ((Globals.prev_workers >= Globals.req_workers) || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
             return false;
         }
-        for (Direction dir : Direction.values()) {
+        int num_tries = 20;
+        Direction dir;
+        for (int i=0; i<num_tries; i++) {
+
+            dir = Player.getRandomDir();
             if (Player.gc.canReplicate(unit.id(), dir)) {
                 Player.gc.replicate(unit.id(), dir);
                 Globals.prev_workers++;
                 //Globals.need_workers = false;
                 return true;
             }
+
         }
+
         return false;
     }
 
@@ -258,8 +278,8 @@ public class BotWorker extends Bot{
             if (Player.gc.canHarvest(id, candidate_dir)) {
                 Player.gc.harvest(id, candidate_dir);
                 Globals.karboniteMap.remove(Nav.getMapLocFromId(id).add(candidate_dir));          // remove doesn't error if not in there!
-                System.out.println(Nav.getMapLocFromId(id).add(candidate_dir));
-                System.out.println(Globals.karboniteMap.contains(Nav.getMapLocFromId(id).add(candidate_dir)));
+                //System.out.println(Nav.getMapLocFromId(id).add(candidate_dir));
+                //System.out.println(Globals.karboniteMap.contains(Nav.getMapLocFromId(id).add(candidate_dir)));
                 //System.out.println("Mining...");
 
                 // remove the spot from the map

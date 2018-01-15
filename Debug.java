@@ -9,4 +9,10 @@ public class Debug {
     public static void printMessage(String message) {
         System.out.println(message);
     }
+
+
+    public static void getTimeLeft() {
+        System.out.format("Time left = ");
+        System.out.println(Player.gc.getTimeLeftMs());
+    }
 }

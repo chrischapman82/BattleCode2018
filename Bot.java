@@ -43,8 +43,28 @@ public class Bot extends Unit {
         return Player.gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), Globals.us);
     }
 
+    public static VecUnit getViewableAlliesInRange(Unit unit, int range) {
+        return Player.gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), range, Globals.us);
+    }
     public static VecUnit getAttackableEnemies(Unit unit) {
         return Player.gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.attackRange(), Globals.them);
+    }
+
+
+    // because they somehow don't have this implemented
+    public static boolean isAttackingBot(UnitType unit_type) {
+        switch (unit_type) {
+            case Factory:
+                return false;
+            case Rocket:
+                return false;
+            case Worker:
+                return false;
+            case Healer:
+                return false;
+            default:
+                return true;
+        }
     }
 
     /* TODO: Hopefully will be better with new api. Otherwise have to create new array list and add to that

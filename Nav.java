@@ -4,13 +4,47 @@ import java.util.ArrayList;
 
 public class Nav {
 
-    public static ArrayList<Direction> directions;      // should pair up with the mapLocation or at least name according to
+    public static ArrayList<Direction> directions0;      // should pair up with the mapLocation or at least name according to
+    public static ArrayList<Direction> directions1;
+    public static ArrayList<Direction> directions2;
+
+    public static boolean directions0explored = true;
+    public static boolean directions1explored = true;
+    public static boolean directions2explored = true;
+
 
     // Initialises the map containing directions to the enemy location
-    public static void initNavDirections(MapLocation enemy_loc) {
+    public static void initNavDirections(ArrayList<MapLocation> enemy_loc) {
 
-        Bfs bfs = new Bfs(enemy_loc);
-        directions = bfs.doBfs();
+        // just doing a max of 3 for now
+        for (int i=0; i<3; i++) {
+
+            // if no more locations stored, ABORT
+            if (i >= enemy_loc.size()) {
+                return; // abort
+            }
+
+            Bfs bfs = new Bfs(enemy_loc.get(i));
+            // should really be an array list but time is of the essence
+            if (i==0) {
+                directions0 = bfs.doBfs();
+                directions0explored = false;
+            } else if(i==1) {
+                directions1 = bfs.doBfs();
+                directions1explored = false;
+            } else if (i==2) {
+                directions2 = bfs.doBfs();
+                directions2explored = false;
+            }
+        }
+
+        // wtf is happening
+        // TODO remove
+        for (int i=0; i<enemy_loc.size(); i++) {
+            System.out.println("YAASS");
+            System.out.println(enemy_loc.get(i));
+        }
+
     }
 
     // Moving using MapLocation. Calls other fn
@@ -22,13 +56,6 @@ public class Nav {
     public static boolean moveTo(int id, Direction dir) {
 
         Direction cand_dir;
-
-        if (Globals.planet_name.equals(Planet.Earth)) {
-            if ((cand_dir = directions.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
-                tryMoveInDirection(id, cand_dir);
-                return true;
-            }
-        }
 
         // try moving normally
         if (tryMoveInDirection(id, dir)) {
@@ -302,10 +329,53 @@ public class Nav {
     // can do this through checking if loc is blocked by friendly, and getting them to move first
 
     // Moves to the enemy base.
+    // Uses the mapped out placed I used at first
     public static boolean moveToEnemyBase(int id) {
 
+        Direction cand_dir;
+        MapLocation curr_loc = getMapLocFromId(id);
+
+        if (Globals.planet_name.equals(Planet.Mars)) {
+            wander(id);
+            return true;
+        }
+
+        // now for earth
+        // this is pretty filthy tbh. Array of ArrayLists would be nice
+        if (!directions0explored) {
+            System.out.println(directions0explored);
+            if ((cand_dir = directions0.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
+
+                // for when we've reached the location. Remove from the stored places!
+                if (Globals.enemy_init_loc.get(0) == curr_loc) {
+                    directions0explored = true;
+                    return moveToEnemyBase(id);
+                }
+                tryMoveInDirection(id, cand_dir);
+                return true;
+            }
+        } else if(!directions1explored) {
+            if ((cand_dir = directions1.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
+                tryMoveInDirection(id, cand_dir);
+                if (Globals.enemy_init_loc.get(1).equals(curr_loc)) {
+                    directions1explored = true;
+                    return moveToEnemyBase(id);
+                }
+                return true;
+            }
+        } else if(!directions2explored) {
+            if ((cand_dir = directions2.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
+                if (Globals.enemy_init_loc.get(2).equals(curr_loc)) {
+                    directions2explored = true;
+                    return moveToEnemyBase(id);
+                }
+                tryMoveInDirection(id, cand_dir);
+                return true;
+            }
+        }
         // if no one left at enemy base, should update messaging.
-        return tryGoToMapLocation(id, Globals.enemy_init_loc);
+
+        return false;
     }
 
 
@@ -316,13 +386,13 @@ public class Nav {
         if (Player.gc.isMoveReady(id)) {
 
             // chooses a random direction, and goes in that dir
-            Direction dir = Player.getRandomDir();
+            Direction dir;
 
-            // currently just rotating to the left. Could mean that units favour going a particular way
-            for (int k=0; k<Direction.values().length; k++) {
-                dir = bc.bcDirectionRotateLeft(dir);
-                if (Player.gc.canMove(id, dir)) {
-                    Player.gc.moveRobot(id, dir);
+            for (int i=0; i<10; i++) {
+                dir = Player.getRandomDir();
+                System.out.println(dir);
+                if (Player.gc.canMove(id,dir)) {
+                    Player.gc.moveRobot(id,dir);
                     return;
                 }
             }

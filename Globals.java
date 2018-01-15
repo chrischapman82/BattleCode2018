@@ -8,8 +8,11 @@ public class Globals {
     public static Team us;
     public static Team them;
 
+    public static boolean charge;       // true if I just wanna start charging them w/out giving a fuck
+
     // storing some mapLocations
-    public static MapLocation enemy_init_loc;
+    public static ArrayList<MapLocation> enemy_init_loc;
+
     public static Planet planet_name;           // PlanetMap planet is much more useful so calling it planet
     public static PlanetMap planet;             // the mpa of the planet that this player is playing on
 
@@ -39,6 +42,8 @@ public class Globals {
 
     public static int req_workers = 4;
     public static int req_rockets = 0;
+
+    public static boolean makeKnights = false;
 
     public static boolean need_workers = false;
     public static boolean needFactory = false;
@@ -86,12 +91,12 @@ public class Globals {
         if (Player.gc.planet() == Planet.Earth) {
             Nav.initNavDirections(enemy_init_loc);
         } else {
-            Nav.initNavDirections(new MapLocation(Planet.Mars, 1, 1));
+            //Nav.initNavDirections(new MapLocation(Planet.Mars, 1, 1));
         }
     }
 
     // finds an initial location to go to.
-    public static MapLocation findInitEnemyLoc() {
+    public static ArrayList<MapLocation> findInitEnemyLoc() {
 
         VecUnit all_units = planet.getInitial_units();
 
@@ -99,18 +104,43 @@ public class Globals {
         if (all_units.size() == 0) {
             return null;
         }
+
+        // gets the
+        Unit curr_unit;
+        MapLocation curr_unit_loc;
+        ArrayList<MapLocation> init_locs = new ArrayList<>();
         for (int i=0; i< all_units.size(); i++) {
-            Unit curr_unit = all_units.get(i);
+            curr_unit = all_units.get(i);
             if (curr_unit.team().equals(them)) {
-                return curr_unit.location().mapLocation();
+                curr_unit_loc = curr_unit.location().mapLocation();
+
+                // also, don't choose spots that are too close to each other
+
+                //System.out.println();
+                if (init_locs.size() >= 1 && curr_unit_loc.distanceSquaredTo(init_locs.get(init_locs.size()-1)) < 10) {
+                    //System.out.println(init_locs.get(init_locs.size()-1));
+                    //System.out.println(curr_unit_loc);
+                    continue;
+                }
+                init_locs.add(curr_unit_loc);
             }
         }
+
         // should not come to this.
-        return null;
+        if (init_locs.size() == 0) {
+            return null;
+        } else {
+            return init_locs;
+        }
     }
 
     public static void updateGlobals() {
+
         resetUnitCounters();
+
+        if (Player.gc.round() > 175) {
+            makeKnights = true;
+        }
     }
 
     public static void resetUnitCounters() {

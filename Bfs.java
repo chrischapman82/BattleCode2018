@@ -51,7 +51,7 @@ public class Bfs {
                 // if tile is open, add to the queue of tiles to check form
                 if (isOpen(curr, next)) {
                     queue.add(next);
-                    dirFrom.set(Tile.getIndex(next), dir);
+                    dirFrom.set(Tile.getIndex(next), bc.bcDirectionOpposite(dir));
                 }
             }
         }
