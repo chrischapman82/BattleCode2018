@@ -14,6 +14,8 @@ public class BotWorker extends Bot{
         If can mine. Min
     */
 
+      public static int PATIENCE = 20;          //basically 4 turns. Patience/num_workers.
+      public static int turns_waited = 0;
     public static void update(Unit unit) {
 
         // TODO: if being attacked. Send a message and stuff
@@ -70,16 +72,15 @@ public class BotWorker extends Bot{
             return false;
         }
 
-        // checks if we need the given building or make one if money is over 300!
+        // checks if we need the given building or make one if money is over x amount!
         if (building.equals(UnitType.Factory) && Globals.prev_factories >= Globals.req_factories) {
 
-            // if we're floating a lot fo money, make another!
-            if (Player.gc.karbonite() >= 250) {
-                // continute
-            } else {
+            // if we're floating a lot of money, but have the req number of factories, try to make another
+            if (Player.gc.karbonite() < 250) {
                 return false;
             }
 
+            // for rockets
         } else if (building.equals(UnitType.Rocket) && Globals.prev_rockets >= Globals.req_rockets){
             return false;
         }
@@ -90,7 +91,7 @@ public class BotWorker extends Bot{
         }
 
         // alright can we blueprint
-        if (tryToBlueprintBuilding(id, UnitType.Factory)) {
+        if (tryToBlueprintBuilding(id, building)) {
             return true;
         }
 
@@ -98,6 +99,67 @@ public class BotWorker extends Bot{
         //TODO find a good factory spot!!! not too close to another factory
         Nav.wander(id);
         return true;
+    }
+
+
+    // Tries to blueprint a certain building
+    public static boolean tryToBlueprintBuilding(int id, UnitType building) {
+
+        //System.out.println("Trying to blueprint Factory");
+        // TODO making sure that I choose a good factory spot
+        // where does not block friendly units, not on minerals
+
+        // check if I have enough money
+        if (Player.gc.karbonite() < bc.bcUnitTypeBlueprintCost(building)) {
+            return false;
+        }
+
+        for (Direction dir : Direction.values()) {
+            //TODO: Place on one with least ores?
+
+            //System.out.println("Looking for a place to put the factory");
+            if (Player.gc.canBlueprint(id, building, dir)) {
+
+                // checks if the factory is being built on a shitty square
+                Direction possible_blocked_dir = Direction.North;
+                int num_blocked_dirs = 0;
+
+                // counts the number of unpassable squares next to this location
+                // Might only need this with factory
+                MapLocation loc = Nav.getMapLocFromId(id);
+                for (int i=0; i<Globals.NUM_DIRECTIONS; i++) {
+                    possible_blocked_dir = bc.bcDirectionRotateLeft(possible_blocked_dir);
+                    if (Tile.isBlocked(loc.add(possible_blocked_dir))) {
+                        num_blocked_dirs++;
+                    }
+                }
+
+                // if a lot of spots are blocked, don't place it there
+                if (turns_waited <= PATIENCE && num_blocked_dirs>=5) {
+                    turns_waited++;
+                    return false;
+                }
+                //System.out.println("Placing Factory blueprint.");
+                if (Player.gc.senseNearbyUnitsByType(loc, 4 ,UnitType.Factory).size() != 0) {
+                    turns_waited++;
+                    return false;
+                }
+                Player.gc.blueprint(id, building, dir);
+
+                if (building == UnitType.Factory) {
+                    Globals.prev_factories++;
+                } else if (building == UnitType.Rocket) {
+                    Globals.prev_rockets++;
+                }
+                turns_waited = 0;
+                return true;
+            }
+        }
+        // if got here, couldn't find a spot to build factory
+        //TODO find a spot where I can build a factory
+
+        //Nav.wander(id);
+        return false;
     }
 
 
@@ -175,44 +237,7 @@ public class BotWorker extends Bot{
         }*/
 
     }
-    //TODO: worker run code
 
-    public static boolean tryToBlueprintBuilding(int id, UnitType building) {
-
-        //System.out.println("Trying to blueprint Factory");
-        // TODO making sure that I choose a good factory spot
-        // where does not block friendly units, not on minerals
-
-        // check if I have enough money
-        if (Player.gc.karbonite() < bc.bcUnitTypeBlueprintCost(building)) {
-            return false;
-        }
-
-        for (Direction dir : Direction.values()) {
-            //TODO: Don't place on ores?
-
-            //System.out.println("Looking for a place to put the factory");
-            if (Player.gc.canBlueprint(id, building, dir)) {
-
-                //System.out.println("Placing Factory blueprint.");
-                Player.gc.blueprint(id, building, dir);
-                // am I allowed to build straight away?
-                //System.out.println("Factory blueprint placed.");
-                if (building == UnitType.Factory) {
-                    Globals.prev_factories++;
-                } else if (building == UnitType.Rocket) {
-                    Globals.prev_rockets++;
-                }
-
-                return true;
-            }
-        }
-        // if got here, couldn't find a spot to build factory
-        //TODO find a spot where I can build a factory
-
-        //Nav.wander(id);
-        return false;
-    }
 
     // Checks if has the money or energy to replicate
     // Then replicates in a random direction if possible

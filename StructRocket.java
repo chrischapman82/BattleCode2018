@@ -5,6 +5,9 @@ public class StructRocket {
 
 
     public static void initRocketInfo() {
+
+        //for (int i=0; i<)
+
         landingLoc = new MapLocation(Planet.Mars, 0, 0);
     }
 

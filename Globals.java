@@ -12,6 +12,7 @@ public class Globals {
 
     // storing some mapLocations
     public static ArrayList<MapLocation> enemy_init_loc;
+    public static MapLocation enemy_loc;
 
     public static Planet planet_name;           // PlanetMap planet is much more useful so calling it planet
     public static PlanetMap planet;             // the mpa of the planet that this player is playing on

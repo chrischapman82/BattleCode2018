@@ -94,11 +94,11 @@ public class AttackingBot extends Bot{
             Unit enemy = visible_enemies.get(i);
 
             //TODO possible problems here if blueprint becomes a unit
-            if ((type = enemy.unitType()) != UnitType.Factory && type != UnitType.Worker && type != UnitType.Rocket) {
+            if (isAttackingBot(enemy.unitType())) {
                 long distsq = enemy.location().mapLocation().distanceSquaredTo(unit_loc);
 
                 // TODO only really works for range atm
-                if (distsq <= enemy.attackRange()) {
+                if (distsq <= BotRanger.ATTACK_RANGE) {
                     if (distsq < closest_dist) {
                         closest_dist = distsq;
                         closest_attacking_enemy = enemy;
@@ -115,7 +115,7 @@ public class AttackingBot extends Bot{
         }
 
         int num_attacking_allies = 0;
-        if (unit_loc.distanceSquaredTo(closest_attacking_enemy.location().mapLocation()) <= unit.attackRange()) {
+        if (unit_loc.distanceSquaredTo(closest_attacking_enemy.location().mapLocation()) <= BotRanger.ATTACK_RANGE) {
             num_attacking_allies++;
         }
 
@@ -126,7 +126,7 @@ public class AttackingBot extends Bot{
 
                 long distsq = ally.location().mapLocation().distanceSquaredTo(closest_attacking_enemy_loc);
 
-                if (distsq <= ally.attackRange()) {
+                if (distsq <= BotRanger.ATTACK_RANGE) {
                     num_attacking_allies++;
                 }
             }

@@ -3,6 +3,7 @@ import bc.*;
 public class BotRanger extends AttackingBot {
 
     public static final int LOW_HP = 60;
+    public static final int ATTACK_RANGE = 50;
 
     public static void update(Unit unit) {
 

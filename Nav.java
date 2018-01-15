@@ -7,10 +7,12 @@ public class Nav {
     public static ArrayList<Direction> directions0;      // should pair up with the mapLocation or at least name according to
     public static ArrayList<Direction> directions1;
     public static ArrayList<Direction> directions2;
+    public static ArrayList<Direction> enemy_curr_directions;
 
     public static boolean directions0explored = true;
     public static boolean directions1explored = true;
     public static boolean directions2explored = true;
+    public static boolean enemy_curr_loc_explored = true;
 
 
     // Initialises the map containing directions to the enemy location
@@ -138,6 +140,11 @@ public class Nav {
         return false;
     }
 
+    // with id instead of unit
+    public static boolean tryMoveDirAndPushAlly(int unit_id, Direction dir) {
+        return tryMoveDirAndPushAlly(Player.gc.unit(unit_id), dir);
+    }
+
     // checks if there is an ally blocking the way
     // if there is, push them.
     // if was able to move to this location, return true
@@ -239,6 +246,8 @@ public class Nav {
     // Moves in the given direction, or @ a 45deg angle
     public static boolean tryMoveInDirection(int id, Direction dir){
 
+        return tryMoveDirAndPushAlly(id, dir);
+        /*
         if (Player.gc.unit(id).movementHeat() >= 10) {
             return false;
         }
@@ -260,7 +269,7 @@ public class Nav {
             return true;
         }
 
-        return false;
+        return false;*/
     }
 
     // try hard to move through
@@ -321,7 +330,7 @@ public class Nav {
         Direction dir_to_loc = dirToMapLoc(unit, map_loc);
 
         // TODO: do something if you can't move int hat direction
-        return tryHardMoveInDirection(id, dir_to_loc);
+        return tryMoveDirAndPushAlly(id, dir_to_loc);
     }
 
 
@@ -356,11 +365,12 @@ public class Nav {
             }
         } else if(!directions1explored) {
             if ((cand_dir = directions1.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
-                tryMoveInDirection(id, cand_dir);
+
                 if (Globals.enemy_init_loc.get(1).equals(curr_loc)) {
                     directions1explored = true;
                     return moveToEnemyBase(id);
                 }
+                tryMoveInDirection(id, cand_dir);
                 return true;
             }
         } else if(!directions2explored) {
@@ -372,6 +382,32 @@ public class Nav {
                 tryMoveInDirection(id, cand_dir);
                 return true;
             }
+        } else if (!enemy_curr_loc_explored) {
+            if ((cand_dir = enemy_curr_directions.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
+
+                if (Globals.enemy_loc.equals(curr_loc)) {
+                    enemy_curr_loc_explored = true;
+                    return moveToEnemyBase(id);
+                }
+                tryMoveInDirection(id, cand_dir);
+                return true;
+            }
+        } else {
+            // for when all other locations have been visited.
+            // setup a new directions map to an enemy
+            //Bot.getViewableEnemies()
+            // TODO not really working atm
+            VecUnit viewable_enemies;
+            if ((viewable_enemies = Bot.getViewableEnemies(Player.gc.unit(id))) != null) {
+                return false;
+            }
+
+            Unit enemy = Bot.chooseClosestEnemy(Player.gc.unit(id), viewable_enemies);
+            Globals.enemy_loc = enemy.location().mapLocation();
+
+            Bfs bfs = new Bfs(Globals.enemy_loc);
+            enemy_curr_directions = bfs.doBfs();
+            enemy_curr_loc_explored = false;
         }
         // if no one left at enemy base, should update messaging.
 

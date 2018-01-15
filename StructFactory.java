@@ -7,12 +7,14 @@ public class StructFactory extends Bot{
         releaseGarrisonUnits(factory);
 
         // should always produce units. No point in not!
+
         if (produceRobot(factory.id(), UnitType.Ranger)) {
             Globals.num_rangers++;
             return;
         }
 
         // code to do different for each
+
 
         /*
         if (factory.team() == Team.Blue) {
@@ -39,7 +41,7 @@ public class StructFactory extends Bot{
         Direction candidate_dir;
         // shitty fix so that it's facing towards the enemy as the first option
         // != for null
-        if (Globals.enemy_init_loc != null) {
+        if (!Nav.directions0explored) {
             candidate_dir = bc.bcDirectionRotateRight(Nav.dirToMapLoc(factory, Globals.enemy_init_loc.get(0)));
         } else {
             candidate_dir = Player.getRandomDir();
@@ -50,15 +52,16 @@ public class StructFactory extends Bot{
         for (int i=0; i<Globals.NUM_DIRECTIONS; i++) {
             candidate_dir = bc.bcDirectionRotateLeft(candidate_dir);
 
-
             if (Player.gc.canUnload(factory_id, candidate_dir)) {
                 Player.gc.unload(factory_id, candidate_dir);
                 return true;
             }
 
             // if there's a friendly unit there. Tell them to move
-            if (Player.gc.hasUnitAtLocation(Nav.getMapLocFromId(factory_id)) &&
-                    (friend = Player.gc.senseUnitAtLocation(Nav.getMapLocFromId(factory_id).add(candidate_dir))).team() == factory.team()) {
+            MapLocation candidate_loc = Nav.getMapLocFromId(factory_id).add(candidate_dir);
+
+            if (Player.gc.hasUnitAtLocation(candidate_loc) &&
+                    (friend = Player.gc.senseUnitAtLocation(candidate_loc)).team() == factory.team()) {
                 if (Nav.politelyAskToMove(friend, candidate_dir) && Player.gc.canUnload(factory_id, candidate_dir)) {
                     Player.gc.unload(factory_id, candidate_dir);
                     //Nav.moveToEnemyBase(Player.gc.senseUnitAtLocation(Nav.getMapLocFromId(factory_id).add(candidate_dir)).id());
