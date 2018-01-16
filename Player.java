@@ -33,7 +33,7 @@ public class Player {
         //TODO: Identify choke point
 
         while (true) {
-            System.out.println("Current round: "+gc.round());
+            //system.out.println("Current round: "+gc.round());
             Debug.getTimeLeft();    // gets teh time left
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
             VecUnit units = gc.myUnits();
@@ -53,14 +53,13 @@ public class Player {
                     Globals.countUnit(unit_type);
 
                     // if the unit is garrisoned or in a rocket. Do nothing as it can't do anything.
-                    if (unit.location().isInGarrison() && !unit.unitType().equals(UnitType.Factory)) {
+                    if (unit.location().isInGarrison()) {
                         //System.out.println("Is garrisoned, do nothing");
                         continue;
                     }
 
 
-                    // Getting the type of unit and tracking how many
-
+                    // Going through the logic for each unit
                         switch(unit_type) {
                             case Factory:
                                 StructFactory.update(unit);
@@ -80,33 +79,10 @@ public class Player {
                             default:
                                 Bot.update(unit);
                         }
-
-
-
-
-                    // switch was being real dodgy so I guess if statements it is
-                    // Changing for each type of unit and delegating to subclasses
-
-                        /*
-                    if (unit_type.equals(UnitType.Factory)) {
-                        StructFactory.update(unit);
-
-                    } else if (unit_type.equals(UnitType.Worker)) {
-                        BotWorker.update(unit);
-
-                    } else if (unit_type.equals(UnitType.Knight)){
-                        BotKnight.update(unit);
-                    } else {
-                        BotRanger.update(unit);
-                    }*/
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-
-                // Updates the unit requirements, giving a better current state of the units
-                Globals.updateUnitReqs();
 
 
 
@@ -130,13 +106,13 @@ public class Player {
         MapLocation loc = new MapLocation(Planet.Earth, 10, 20);
 
         // Getting locs with directions
-        System.out.println("loc: "+loc+", one step to the Northwest: "+loc.add(Direction.Northwest));
+        //system.out.println("loc: "+loc+", one step to the Northwest: "+loc.add(Direction.Northwest));
         //System.out.println("loc x: "+loc.getX());
 
         //System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
         //System.out.println(bc.bcDirectionRotateLeft(Direction.North));
 
-        System.out.format("%d %d", Globals.planet_width, Globals.planet_height);
+        //system.out.format("%d %d", Globals.planet_width, Globals.planet_height);
 
         // docker commands
         /*

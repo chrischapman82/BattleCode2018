@@ -19,7 +19,6 @@ public class Globals {
 
     public static MapLocation landingLoc;
 
-    public static int req_factories = 2;  // I want one as soon as ossible
     public static int NUM_DIRECTIONS = 8;
 
     // map dimensions:
@@ -27,29 +26,27 @@ public class Globals {
     public static int planet_height;
     public static int planet_size;
 
-    public static int num_workers;
-    public static int num_factories;
-    public static int num_knights;
-    public static int num_rangers;
+    // TODO change these to a single array, with worker = index 0, fact = index 1 etc.
+    public static ArrayList<Integer> curr_units;
+    public static ArrayList<Integer> num_units;
+    public static ArrayList<Integer> req_units;
+
+    public static final int WORKER_INDEX = 0;
+    public static final int RANGER_INDEX = 1;
+    public static final int KNIGHT_INDEX_ = 2;
+    public static final int FACTORY_INDEX = 3;
+    public static final int ROCKET_INDEX = 4;
+    public static final int MAGE_INDEX = 5;
+    public static final int HEALER_INDEX = 6;
+
+    public static final int NUM_UNIT_TYPES = 7;        // the number of possible units
 
 
     // number of each for the previous turn.
     // start high will only last 1 turn. Used to make sure that mass replication doesn't happen first round
-    public static int prev_workers = 100;
-    public static int prev_factories = 100;
-    public static int prev_rockets = 100;
-    public static int prev_knights = 100;
-    public static int prev_rangers = 100;
 
-    public static int req_workers = 4;
-    public static int req_rockets = 0;
 
     public static boolean makeKnights = false;
-
-    public static boolean need_workers = false;
-    public static boolean needFactory = false;
-
-    public static int startBuildingRocketsRound = 500;      // should this be final
 
     //public static ArrayList<Boolean> karboniteMap;
     public static ArrayList<MapLocation> karboniteMap;
@@ -88,9 +85,15 @@ public class Globals {
 
         StructRocket.initRocketInfo();
 
+        // setting up the unit stuff
+        curr_units = initUnitsArray(curr_units);
+        num_units = initUnitsArray(num_units);
+        req_units = initUnitsArray(req_units);
+        num_units.set(WORKER_INDEX, 100);       // stops mass replication first round
+        initReqUnits();     // for strategy
+
 
         // time to init bfs:
-
         if (Player.gc.planet() == Planet.Earth) {
             Nav.initNavDirections(enemy_init_loc);
         } else {
@@ -98,12 +101,30 @@ public class Globals {
         }
     }
 
+    public static ArrayList<Integer> initUnitsArray(ArrayList<Integer> array) {
+        array = new ArrayList<>(NUM_UNIT_TYPES);
+        for (int i=0; i<NUM_UNIT_TYPES;i++) {
+            array.add(i,0);
+        }
+        return array;
+    }
+
+    public static void initReqUnits() {
+
+        // 4 workers seems good
+        req_units.set(WORKER_INDEX, 4);
+
+        // 2 factories seems dope
+        req_units.set(FACTORY_INDEX, 2);
+
+    }
+
     // finds an initial location to go to.
     public static ArrayList<MapLocation> findInitEnemyLoc() {
 
         VecUnit all_units = planet.getInitial_units();
 
-        // basically for mars
+        // included so that mars doesn't run
         if (all_units.size() == 0) {
             return null;
         }
@@ -148,44 +169,115 @@ public class Globals {
 
     public static void resetUnitCounters() {
 
-        prev_workers = num_workers;
-        prev_factories = num_factories;
-        prev_knights = num_knights;
-        prev_rangers = num_rangers;
+        num_units.set(WORKER_INDEX, curr_units.get(WORKER_INDEX));
+        num_units.set(RANGER_INDEX, curr_units.get(RANGER_INDEX));
+        num_units.set(KNIGHT_INDEX_, curr_units.get(KNIGHT_INDEX_));
+        num_units.set(FACTORY_INDEX, curr_units.get(FACTORY_INDEX));
+        num_units.set(ROCKET_INDEX, curr_units.get(ROCKET_INDEX));
+        num_units.set(MAGE_INDEX, curr_units.get(MAGE_INDEX));
+        num_units.set(HEALER_INDEX, curr_units.get(HEALER_INDEX));
 
-        num_workers = 0;
-        num_factories = 0;
-        num_knights = 0;
-        num_rangers = 0;
+        // reset all the counters for the round
+        for (int i=0; i<curr_units.size(); i++) {
+            curr_units.set(i,0);
+        }
     }
 
     public static void countUnit(UnitType unit_type) {
 
         switch (unit_type) {
-            case Factory:
-                num_factories++;
-                break;
             case Worker:
-                num_workers++;
+                curr_units.set(WORKER_INDEX,curr_units.get(WORKER_INDEX)+1);
                 break;
             case Knight:
-                num_knights++;
+                curr_units.set(KNIGHT_INDEX_,curr_units.get(KNIGHT_INDEX_)+1);
                 break;
             case Ranger:
-                num_rangers++;
+                curr_units.set(RANGER_INDEX,curr_units.get(RANGER_INDEX)+1);
+                break;
+            case Factory:
+                curr_units.set(FACTORY_INDEX,curr_units.get(FACTORY_INDEX)+1);
+                break;
+            case Rocket:
+                curr_units.set(ROCKET_INDEX, curr_units.get(ROCKET_INDEX)+1);
+                break;
+            case Mage:
+                curr_units.set(MAGE_INDEX, curr_units.get(MAGE_INDEX)+1);
+                break;
+            case Healer:
+                curr_units.set(HEALER_INDEX, curr_units.get(HEALER_INDEX)+1);
                 break;
             default:
                 break;
         }
     }
 
-    // Not really being used atm
-    public static void updateUnitReqs() {
-        //System.out.format("prev_workers = %d, req_workers = %d, num_workers = %d\n", prev_workers, req_workers, num_workers);
-        if (prev_workers < req_workers) {
-            need_workers = true;
-        } else {
-            need_workers = false;
+
+    // some yummy copy paste code
+
+    public static Integer getNumUnitsOfType(UnitType unit_type) {
+        switch (unit_type) {
+            case Worker:
+                return num_units.get(WORKER_INDEX);
+            case Knight:
+                return num_units.get(KNIGHT_INDEX_);
+            case Ranger:
+                return num_units.get(RANGER_INDEX);
+            case Factory:
+                return num_units.get(FACTORY_INDEX);
+            case Rocket:
+                return num_units.get(ROCKET_INDEX);
+            case Mage:
+                return num_units.get(MAGE_INDEX);
+            case Healer:
+                return num_units.get(HEALER_INDEX);
+            default:
+                // should never come to this
+                return null;
+        }
+    }
+
+    public static Integer getCurrUnitsOfType(UnitType unit_type) {
+        switch (unit_type) {
+            case Worker:
+                return curr_units.get(WORKER_INDEX);
+            case Knight:
+                return curr_units.get(KNIGHT_INDEX_);
+            case Ranger:
+                return curr_units.get(RANGER_INDEX);
+            case Factory:
+                return curr_units.get(FACTORY_INDEX);
+            case Rocket:
+                return curr_units.get(ROCKET_INDEX);
+            case Mage:
+                return curr_units.get(MAGE_INDEX);
+            case Healer:
+                return curr_units.get(HEALER_INDEX);
+            default:
+                // should never come to this
+                return null;
+        }
+    }
+
+    public static Integer getReqUnitsOfType(UnitType unit_type) {
+        switch (unit_type) {
+            case Worker:
+                return req_units.get(WORKER_INDEX);
+            case Knight:
+                return req_units.get(KNIGHT_INDEX_);
+            case Ranger:
+                return req_units.get(RANGER_INDEX);
+            case Factory:
+                return req_units.get(FACTORY_INDEX);
+            case Rocket:
+                return req_units.get(ROCKET_INDEX);
+            case Mage:
+                return req_units.get(MAGE_INDEX);
+            case Healer:
+                return req_units.get(HEALER_INDEX);
+            default:
+                // should never come to this
+                return null;
         }
     }
 
@@ -212,7 +304,7 @@ public class Globals {
     // prints infromation about the map for debugging purposes
     public static void printMapInfo() {
         // print the width, height etc.
-        System.out.format("MAP INFO: width = %d, height = %d\n", planet_width, planet_height);
+        //system.out.format("MAP INFO: width = %d, height = %d\n", planet_width, planet_height);
     }
 
 }

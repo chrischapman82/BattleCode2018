@@ -1,8 +1,10 @@
 import bc.*;
 
-public class Structure{
+public class Structure extends Unit {
 
-    public static final int MAX_GARRISN_UNITS = 8;
+    public static final int MAX_GARRISON_UNITS = 8;
+
+
     public static boolean releaseGarrisonUnits(Unit building) {
 
         // checks if there are units inside
@@ -43,6 +45,7 @@ public class Structure{
                 }
             }
         }
+
         return false;
 
     }

@@ -104,12 +104,19 @@ public class StructRocket extends Structure {
         }
 
         // If full garrison. Time to go.
-        if (rocket.structureGarrison().size() == MAX_GARRISN_UNITS) {
+        if (rocket.structureGarrison().size() == MAX_GARRISON_UNITS) {
             return true;
         }
 
+
+
         // If low hp, go time
         if (ROCKET_LOW_HP <= 60) {
+            return true;
+        }
+
+        // oh shit you're about to die, run
+        if (Player.gc.round() == 745) {
             return true;
         }
 

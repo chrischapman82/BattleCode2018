@@ -16,6 +16,8 @@ public class BotWorker extends Bot{
 
       public static int PATIENCE = 20;          //basically 4 turns. Patience/num_workers.
       public static int turns_waited = 0;
+
+
     public static void update(Unit unit) {
 
         // TODO: if being attacked. Send a message and stuff
@@ -29,24 +31,15 @@ public class BotWorker extends Bot{
 
         // TODO retreat when being attacked
 
-        //System.out.println(unit.abilityCooldown() >= 10);
-        //System.out.println(unit.abilityCooldown());
         // 2. If can replicate. Do that.
         if (tryToReplicate(unit)) {
             return;
         }
 
-        //System.out.println(Globals.req_factories);
-        //System.out.println(Globals.prev_factories);
-        //System.out.println(Globals.num_factories);
-        // 3. Checks if I should and can build a factory,
-
-
+        // 3. Checks if I should and can build a building,
         if (tryToCreateBuilding(id, UnitType.Factory)) {
-
             return;
         }
-
         if (tryToCreateBuilding(id, UnitType.Rocket)) {
             return;
         }
@@ -66,14 +59,13 @@ public class BotWorker extends Bot{
     // If yes, either builds the building, or looks for a good spot for it
     public static boolean tryToCreateBuilding(int id, UnitType building) {
 
-
         // can't build on mars
         if (Globals.planet_name.equals(Planet.Mars)) {
             return false;
         }
 
         // checks if we need the given building or make one if money is over x amount!
-        if (building.equals(UnitType.Factory) && Globals.prev_factories >= Globals.req_factories) {
+        if (building.equals(UnitType.Factory) && Globals.getNumUnitsOfType(building) >= Globals.getReqUnitsOfType(building)) {
 
             // if we're floating a lot of money, but have the req number of factories, try to make another
             if (Player.gc.karbonite() < 250) {
@@ -146,12 +138,8 @@ public class BotWorker extends Bot{
                     return false;
                 }
                 Player.gc.blueprint(id, building, dir);
+                Globals.countUnit(building);
 
-                if (building == UnitType.Factory) {
-                    Globals.prev_factories++;
-                } else if (building == UnitType.Rocket) {
-                    Globals.prev_rockets++;
-                }
                 turns_waited = 0;
                 return true;
             }
@@ -185,7 +173,7 @@ public class BotWorker extends Bot{
 
         // there's nothing left!
         if (Globals.karboniteMap.size() == 0) {
-            System.out.println("ALL KARBONITE IS NOW GONE");
+            //system.out.println("ALL KARBONITE IS NOW GONE");
             Globals.karbonite_left = false;
         }
 
@@ -245,7 +233,8 @@ public class BotWorker extends Bot{
     // TODO change random code so that it doesn't always start North
     public static boolean tryToReplicate(Unit unit) {
 
-        if ((Globals.prev_workers >= Globals.req_workers) || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
+        if ((Globals.getNumUnitsOfType(UnitType.Worker) >= Globals.getReqUnitsOfType(UnitType.Worker))
+                                        || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
             return false;
         }
         int num_tries = 20;
@@ -255,7 +244,7 @@ public class BotWorker extends Bot{
             dir = Player.getRandomDir();
             if (Player.gc.canReplicate(unit.id(), dir)) {
                 Player.gc.replicate(unit.id(), dir);
-                Globals.prev_workers++;
+                Globals.countUnit(UnitType.Worker);
                 //Globals.need_workers = false;
                 return true;
             }
@@ -281,8 +270,8 @@ public class BotWorker extends Bot{
         }
 
         // Checks if the things nearby are buildable
-        for (int j=0; j<nearby.size(); j++) {
-            Unit other = nearby.get(j);
+        for (int i=0; i<nearby.size(); i++) {
+            Unit other = nearby.get(i);
 
             // Checks if something repairable is next to the worker
             if (Player.gc.canBuild(unit.id(), other.id())) {

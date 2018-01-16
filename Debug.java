@@ -7,12 +7,12 @@ public class Debug {
 
     // Error printing
     public static void printMessage(String message) {
-        System.out.println(message);
+        //system.out.println(message);
     }
 
 
     public static void getTimeLeft() {
-        System.out.format("Time left = ");
-        System.out.println(Player.gc.getTimeLeftMs());
+        //system.out.format("Time left = ");
+        //system.out.println(Player.gc.getTimeLeftMs());
     }
 }

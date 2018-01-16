@@ -120,10 +120,10 @@ public class Bfs {
 
         for (int i=0; i<dirFrom.size(); i++) {
             if (dirFrom.get(i) == null) {
-                System.out.println("NULL");
+                //system.out.println("NULL");
                 continue;
             }
-            System.out.println(dirFrom.get(i));
+            //system.out.println(dirFrom.get(i));
         }
     }*/
 
@@ -155,16 +155,16 @@ public class Bfs {
         for (int i=0; i<Globals.planet_size; i++) {
             curr = cameFrom.get(i);
             if (curr == null) {
-                System.out.format("-----|");
+                //system.out.format("-----|");
             } else {
-                System.out.format("%2d,%2d|", cameFrom.get(i).getX(), cameFrom.get(i).getY());
+                //system.out.format("%2d,%2d|", cameFrom.get(i).getX(), cameFrom.get(i).getY());
             }
 
             if (i%Globals.planet_width == Globals.planet_width-1) {
-                System.out.println("");
+                //system.out.println("");
             }
         }
-        System.out.println("**");
+        //system.out.println("**");
     }*/
 
 }

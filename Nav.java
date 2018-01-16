@@ -43,8 +43,8 @@ public class Nav {
         // wtf is happening
         // TODO remove
         for (int i=0; i<enemy_loc.size(); i++) {
-            System.out.println("YAASS");
-            System.out.println(enemy_loc.get(i));
+            //system.out.println("YAASS");
+            //system.out.println(enemy_loc.get(i));
         }
 
     }
@@ -352,7 +352,7 @@ public class Nav {
         // now for earth
         // this is pretty filthy tbh. Array of ArrayLists would be nice
         if (!directions0explored) {
-            System.out.println(directions0explored);
+            //system.out.println(directions0explored);
             if ((cand_dir = directions0.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
 
                 // for when we've reached the location. Remove from the stored places!
@@ -426,7 +426,7 @@ public class Nav {
 
             for (int i=0; i<10; i++) {
                 dir = Player.getRandomDir();
-                System.out.println(dir);
+                //system.out.println(dir);
                 if (Player.gc.canMove(id,dir)) {
                     Player.gc.moveRobot(id,dir);
                     return;

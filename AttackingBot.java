@@ -57,7 +57,7 @@ public class AttackingBot extends Bot{
 
         // if outnumbered, run away
         if (out_numbered) {
-            System.out.println("I am outnumbered");
+            //system.out.println("I am outnumbered");
             retreat(unit);
             return;
         }
