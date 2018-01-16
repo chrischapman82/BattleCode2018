@@ -86,6 +86,8 @@ public class Globals {
         enemy_init_loc = findInitEnemyLoc();
         priorityEnemies = new ArrayList<>();
 
+        StructRocket.initRocketInfo();
+
 
         // time to init bfs:
 

@@ -58,11 +58,36 @@ public class Player {
                         continue;
                     }
 
+
                     // Getting the type of unit and tracking how many
+
+                        switch(unit_type) {
+                            case Factory:
+                                StructFactory.update(unit);
+                                break;
+                            case Rocket:
+                                StructRocket.update(unit);
+                                break;
+                            case Worker:
+                                BotWorker.update(unit);
+                                break;
+                            case Ranger:
+                                BotRanger.update(unit);
+                                break;
+                            case Knight:
+                                BotKnight.update(unit);
+                                break;
+                            default:
+                                Bot.update(unit);
+                        }
+
+
 
 
                     // switch was being real dodgy so I guess if statements it is
                     // Changing for each type of unit and delegating to subclasses
+
+                        /*
                     if (unit_type.equals(UnitType.Factory)) {
                         StructFactory.update(unit);
 
@@ -73,7 +98,7 @@ public class Player {
                         BotKnight.update(unit);
                     } else {
                         BotRanger.update(unit);
-                    }
+                    }*/
 
                     } catch (Exception e) {
                         e.printStackTrace();

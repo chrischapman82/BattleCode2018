@@ -1,6 +1,6 @@
 import bc.*;
 
-public class StructFactory extends Bot{
+public class StructFactory extends Structure{
 
     public static void update(Unit factory) {
 
@@ -8,10 +8,12 @@ public class StructFactory extends Bot{
 
         // should always produce units. No point in not!
 
+        /*
         if (produceRobot(factory.id(), UnitType.Ranger)) {
             Globals.num_rangers++;
             return;
         }
+        */
 
         // code to do different for each
 
@@ -29,6 +31,7 @@ public class StructFactory extends Bot{
         }*/
     }
 
+    /*
     public static boolean releaseGarrisonUnits(Unit factory) {
 
         // checks if there are units inside
@@ -73,13 +76,16 @@ public class StructFactory extends Bot{
 
         return false;
 
-    }
+    }*/
 
     //Produce a unit if it's possible
     //Have to check if a factory can unload a unit and build a unit in the same turn
     public static boolean produceRobot(int factory_id, UnitType unit_type) {
 
+        // TODO: Create workers if we run out
+
         if ((Player.gc.canProduceRobot(factory_id, unit_type))) {
+
             Player.gc.produceRobot(factory_id, unit_type);
             System.out.format("Producing %s\n", unit_type);
             // TODO count these?

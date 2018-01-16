@@ -81,7 +81,8 @@ public class BotWorker extends Bot{
             }
 
             // for rockets
-        } else if (building.equals(UnitType.Rocket) && Globals.prev_rockets >= Globals.req_rockets){
+            // build whenever I've made the rocket available
+        } else if (building.equals(UnitType.Rocket) && Player.gc.round() > Research.rocketAvailableRound) { //&& Globals.prev_rockets >= Globals.req_rockets){
             return false;
         }
 
