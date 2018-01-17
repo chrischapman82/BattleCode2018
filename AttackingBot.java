@@ -20,6 +20,8 @@ public class AttackingBot extends Bot{
         // if i have no mates
 
 
+        // for loading into rockets
+
         int nearby_attacking_allies = 0;
         for (int i=0; i<nearby_allies.size(); i++) {
             if (Bot.isAttackingBot(nearby_allies.get(i).unitType())) {
@@ -45,6 +47,8 @@ public class AttackingBot extends Bot{
 
         // if should atk, DO!
 
+
+
         if (attack(unit, attackable_enemies)) {
 
             if (out_numbered) {
@@ -53,6 +57,10 @@ public class AttackingBot extends Bot{
             } else {
                 return;
             }
+        }
+
+        if (doRocketStuff(unit)) {
+            return;
         }
 
         // if outnumbered, run away

@@ -14,6 +14,8 @@ public class Nav {
     public static boolean directions2explored = true;
     public static boolean enemy_curr_loc_explored = true;
 
+    public static int pushedTimes = 0;
+
 
     // Initialises the map containing directions to the enemy location
     public static void initNavDirections(ArrayList<MapLocation> enemy_loc) {
@@ -151,6 +153,10 @@ public class Nav {
     // else: false
     public static boolean tryMoveDirAndPushAlly(Unit unit, Direction dir) {
 
+        // for when evreryones just pushign and shoving
+        if (pushedTimes > 3) {
+            return false;
+        }
         if (unit.movementHeat() >= 10) {
             return false;
         }
@@ -163,14 +169,15 @@ public class Nav {
             return false;
         }
 
-
         Unit friend;
         if ((friend = getFriendlyMovableUnitAtLocation(unit_loc.add(dir))) != null) {
 
             if (rudelyAskToMove(friend, dir)) {
+                pushedTimes++;
                 return tryMoveForward(unit.id(), dir);
             }
         } else if (tryMoveForward(unit.id(), dir)) {
+            pushedTimes = 0;
             return true;
         }
         return false;
@@ -398,7 +405,7 @@ public class Nav {
             //Bot.getViewableEnemies()
             // TODO not really working atm
             VecUnit viewable_enemies;
-            if ((viewable_enemies = Bot.getViewableEnemies(Player.gc.unit(id))) != null) {
+            if ((viewable_enemies = Bot.getViewableEnemies(Player.gc.unit(id))) == null) {
                 return false;
             }
 

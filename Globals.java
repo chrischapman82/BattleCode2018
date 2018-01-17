@@ -165,6 +165,12 @@ public class Globals {
         if (Player.gc.round() > 175) {
             makeKnights = true;
         }
+
+        if (Player.gc.round() > Research.rocketAvailableRound - 10) {
+            req_units.set(WORKER_INDEX, 20);
+        }
+
+
     }
 
     public static void resetUnitCounters() {

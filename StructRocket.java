@@ -6,11 +6,12 @@ public class StructRocket extends Structure {
 
     public static ArrayList<MapLocation> landingLocs;   // contains all the possible places to land on mars
     public static int landingLocsCurrIndex = 0;         // where we're up to in the landing locs array
-    public static ArrayList<MapLocation> curr_rocket_spots;
+    public static ArrayList<MapLocation> curr_rocket_spots_mars;
+    public static ArrayList<MapLocation> curr_rocket_spots_earth;
     public static ArrayList<MapLocation> rocket_locs;
 
 
-    public static final int ROCKET_LOW_HP = 60;
+    public static final int ROCKET_LOW_HP = 100;
 
     public static void initRocketInfo() {
 
@@ -21,7 +22,8 @@ public class StructRocket extends Structure {
         }
 
         landingLocs = new ArrayList<>();
-        curr_rocket_spots = new ArrayList<>();
+        curr_rocket_spots_mars = new ArrayList<>();
+        curr_rocket_spots_earth = new ArrayList<>();
         rocket_locs = new ArrayList<>();
 
         PlanetMap mars_map = Player.gc.startingMap(Planet.Mars);
@@ -49,6 +51,10 @@ public class StructRocket extends Structure {
             return;
         }
 
+        // adds the current rocket to the rocket locations if not already there
+        if (curr_rocket_spots_earth.size() == 0 || !curr_rocket_spots_earth.contains(rocket.location().mapLocation())) {
+            curr_rocket_spots_earth.add(rocket.location().mapLocation());
+        }
         // For Earth
         // just chooses a random, open spot to launch at
 
@@ -66,6 +72,7 @@ public class StructRocket extends Structure {
         // get the given landing loc
         MapLocation cand_landingLoc = landingLocs.get(landingLocsCurrIndex);
         if (shouldLaunch(rocket, cand_landingLoc)) {
+            curr_rocket_spots_earth.remove(rocket.location().mapLocation());    // remove off of earth
             Player.gc.launchRocket(rocket.id(), cand_landingLoc);
         }
     }
@@ -75,12 +82,12 @@ public class StructRocket extends Structure {
     public static boolean hasLandedAtMapLoc(MapLocation landing_loc) {
 
         // If no spots have been done before
-        if (curr_rocket_spots.size() == 0) {
+        if (curr_rocket_spots_mars.size() == 0) {
             return true;
         }
 
         // if the spot has already been chosen by one of our rockets, don't get there.
-        if (curr_rocket_spots.contains(landing_loc)) {
+        if (curr_rocket_spots_mars.contains(landing_loc)) {
             return false;
         }
 
@@ -104,23 +111,21 @@ public class StructRocket extends Structure {
         }
 
         // If full garrison. Time to go.
-        if (rocket.structureGarrison().size() == MAX_GARRISON_UNITS) {
+        if (rocket.structureGarrison().size() >= MAX_GARRISON_UNITS-2) {
             return true;
         }
-
 
 
         // If low hp, go time
-        if (ROCKET_LOW_HP <= 60) {
+        if (rocket.health() <= ROCKET_LOW_HP) {
             return true;
         }
-
         // oh shit you're about to die, run
         if (Player.gc.round() == 745) {
             return true;
         }
 
-        return true;
+        return false;
     }
 
 }

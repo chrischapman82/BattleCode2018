@@ -24,8 +24,14 @@ public class BotWorker extends Bot{
         // TODO: Gathering Karbonite
         int id = unit.id();
 
+
+
         // 1. Checks if should any blueprints can be built nearby. Builds them if yes
         if (tryToBuild(unit)) {
+            return;
+        }
+
+        if (doRocketStuff(unit)) {
             return;
         }
 
@@ -35,6 +41,9 @@ public class BotWorker extends Bot{
         if (tryToReplicate(unit)) {
             return;
         }
+
+        // trying out some rocket stuff
+
 
         // 3. Checks if I should and can build a building,
         if (tryToCreateBuilding(id, UnitType.Factory)) {
@@ -68,13 +77,13 @@ public class BotWorker extends Bot{
         if (building.equals(UnitType.Factory) && Globals.getNumUnitsOfType(building) >= Globals.getReqUnitsOfType(building)) {
 
             // if we're floating a lot of money, but have the req number of factories, try to make another
-            if (Player.gc.karbonite() < 250) {
+            //if (Player.gc.karbonite() < 250) {
                 return false;
-            }
+            //}
 
             // for rockets
             // build whenever I've made the rocket available
-        } else if (building.equals(UnitType.Rocket) && Player.gc.round() > Research.rocketAvailableRound) { //&& Globals.prev_rockets >= Globals.req_rockets){
+        } else if (building.equals(UnitType.Rocket) && Player.gc.round() < Research.rocketAvailableRound) { //&& Globals.prev_rockets >= Globals.req_rockets){
             return false;
         }
 
@@ -138,6 +147,8 @@ public class BotWorker extends Bot{
                     return false;
                 }
                 Player.gc.blueprint(id, building, dir);
+                // adds the loc to our map. means that if a rocket dies, I can't really tell
+
                 Globals.countUnit(building);
 
                 turns_waited = 0;
@@ -233,9 +244,13 @@ public class BotWorker extends Bot{
     // TODO change random code so that it doesn't always start North
     public static boolean tryToReplicate(Unit unit) {
 
+
+
         if ((Globals.getNumUnitsOfType(UnitType.Worker) >= Globals.getReqUnitsOfType(UnitType.Worker))
                                         || Player.gc.karbonite() < 15 || unit.abilityHeat() >= 10) {
-            return false;
+            if (!(Player.gc.round()>750)) {
+                return false;
+            }
         }
         int num_tries = 20;
         Direction dir;

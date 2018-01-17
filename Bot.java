@@ -2,10 +2,6 @@ import bc.*;
 
 public class Bot extends Unit {
 
-    public Bot() {
-
-    }
-
     // retreating when the going gets tough
     public static boolean retreat(Unit unit) {
 
@@ -104,6 +100,57 @@ public class Bot extends Unit {
             }
         }
         return priority_enemy;
+    }
+
+    public static boolean doRocketStuff(Unit unit) {
+
+        // No need to do this on mars
+        if (Globals.planet_name.equals(Planet.Mars)) {
+            return false;
+        }
+
+        if (Player.gc.round() < Research.rocketAvailableRound) {
+            return false;
+        }
+
+       // System.out.println("Curr spots earth size");
+       // System.out.println(StructRocket.curr_rocket_spots_earth.size());
+        if (StructRocket.curr_rocket_spots_earth.size() == 0) {
+            return false;
+        }
+
+        MapLocation rocket_loc;
+        MapLocation unit_loc = unit.location().mapLocation();
+        MapLocation closest_rocket = StructRocket.curr_rocket_spots_earth.get(0);
+        int closest_dist = Integer.MAX_VALUE;
+        int curr_dist;
+
+        for (int i=0; i<StructRocket.curr_rocket_spots_earth.size(); i++) {
+            rocket_loc = StructRocket.curr_rocket_spots_earth.get(i);
+            if ((curr_dist = (int)unit_loc.distanceSquaredTo(rocket_loc)) < closest_dist) {
+                closest_dist = curr_dist;
+                closest_rocket = rocket_loc;
+            }
+        }
+
+        if (unit_loc.isAdjacentTo(closest_rocket)) {
+            //System.out.println("Is adjacent");
+
+            Unit rocket = Player.gc.senseUnitAtLocation(closest_rocket);
+            //System.out.println(Player.gc.canLoad(rocket.id(), unit.id()));
+            if (Player.gc.canLoad(rocket.id(), unit.id())) {
+                //System.out.println("Loading into the rocket!");
+                Player.gc.load(rocket.id(), unit.id());
+                return true;
+            }
+            return true;
+        }
+        //System.out.println(unit_loc);
+        //System.out.println(closest_rocket);
+
+        // move to the first rocket loc
+        Nav.moveTo(unit.id(), closest_rocket);
+        return true;
     }
 
     public static Unit chooseClosestAttackableEnemy(Unit unit, VecUnit enemies) {

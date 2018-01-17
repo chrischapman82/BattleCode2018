@@ -8,12 +8,11 @@ public class StructFactory extends Structure{
 
         // should always produce units. No point in not!
 
-        /*
+
         if (produceUnits(factory.id())) {
-            Globals.num_rangers++;
             return;
         }
-        */
+
 
         // code to do different for each
 
@@ -38,6 +37,12 @@ public class StructFactory extends Structure{
             return false;
         }
 
+        // if we have no workers, make some
+        if (Player.gc.karbonite() >= 25 && Globals.getNumUnitsOfType(UnitType.Worker) == 0) {
+            return produceRobot(factory_id, UnitType.Worker);
+        }
+
+
         return produceRobot(factory_id, UnitType.Ranger);
     }
 
@@ -46,7 +51,6 @@ public class StructFactory extends Structure{
     public static boolean produceRobot(int factory_id, UnitType unit_type) {
 
         // TODO: Create workers if we run out
-
         if ((Player.gc.canProduceRobot(factory_id, unit_type))) {
             Player.gc.produceRobot(factory_id, unit_type);
             Globals.countUnit(unit_type);

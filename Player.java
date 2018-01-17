@@ -41,7 +41,6 @@ public class Player {
             // try to reset for each round
             Globals.updateGlobals();
 
-
                 for (int i = 0; i < units.size(); i++) {
                     try {
 
