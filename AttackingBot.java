@@ -30,7 +30,7 @@ public class AttackingBot extends Bot{
         }
 
         // travel as a group of at least 3!
-        if (unit.team() == Team.Blue && nearby_attacking_allies <= 3) {
+        if (nearby_attacking_allies <= 3) {
             // wait homie
             attack(unit, attackable_enemies);
 

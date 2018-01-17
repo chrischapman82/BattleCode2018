@@ -320,7 +320,7 @@ public class BotWorker extends Bot{
 
         // Checking if can build
         if (unit.location().mapLocation().isAdjacentTo(building_loc)) {
-            System.out.println("Is adjacent");
+            //System.out.println("Is adjacent");
 
             if (Player.gc.canBuild(unit.id(), building.id())) {
                 Player.gc.build(unit.id(), building.id());

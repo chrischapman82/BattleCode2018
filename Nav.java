@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class Nav {
 
-    public static ArrayList<Direction> directions0;      // should pair up with the mapLocation or at least name according to
-    public static ArrayList<Direction> directions1;
-    public static ArrayList<Direction> directions2;
-    public static ArrayList<Direction> enemy_curr_directions;
+    public static ArrayList<Direction> directions0 = new ArrayList<>();      // should pair up with the mapLocation or at least name according to
+    public static ArrayList<Direction> directions1 = new ArrayList<>();
+    public static ArrayList<Direction> directions2 = new ArrayList<>();
+    public static ArrayList<Direction> enemy_curr_directions = new ArrayList<>();
 
     public static boolean directions0explored = true;
     public static boolean directions1explored = true;
@@ -352,8 +352,7 @@ public class Nav {
         MapLocation curr_loc = getMapLocFromId(id);
 
         if (Globals.planet_name.equals(Planet.Mars)) {
-            wander(id);
-            return true;
+            return goToCurrEnemyLoc(id);
         }
 
         // now for earth
@@ -389,10 +388,26 @@ public class Nav {
                 tryMoveInDirection(id, cand_dir);
                 return true;
             }
-        } else if (!enemy_curr_loc_explored) {
+        }
+
+        // if there's no initial locations left to explore, create one whenever you see a new enemy
+        return goToCurrEnemyLoc(id);
+        // if no one left at enemy base, should update messaging.
+    }
+
+
+    // for going to a set location when ever my other options are gone
+    public static boolean goToCurrEnemyLoc(int id) {
+        Direction cand_dir;
+
+        // checks if there's a current enemy loc already found
+        if (!enemy_curr_loc_explored) {
+
+            // checks to see if the map exists.
             if ((cand_dir = enemy_curr_directions.get(Tile.getIndex(getMapLocFromId(id)))) != null) {
 
-                if (Globals.enemy_loc.equals(curr_loc)) {
+                // If we've hit the given spot, reset the map.
+                if (Globals.enemy_loc.equals(Nav.getMapLocFromId(id))) {
                     enemy_curr_loc_explored = true;
                     return moveToEnemyBase(id);
                 }
@@ -404,17 +419,20 @@ public class Nav {
             // setup a new directions map to an enemy
             //Bot.getViewableEnemies()
             // TODO not really working atm
+
             VecUnit viewable_enemies;
-            if ((viewable_enemies = Bot.getViewableEnemies(Player.gc.unit(id))) == null) {
+            if ((viewable_enemies = Bot.getViewableEnemies(Player.gc.unit(id))).size() == 0) {
                 return false;
             }
 
+            // sets up a location for the boys to go to
             Unit enemy = Bot.chooseClosestEnemy(Player.gc.unit(id), viewable_enemies);
             Globals.enemy_loc = enemy.location().mapLocation();
 
             Bfs bfs = new Bfs(Globals.enemy_loc);
             enemy_curr_directions = bfs.doBfs();
             enemy_curr_loc_explored = false;
+            goToCurrEnemyLoc(id);
         }
         // if no one left at enemy base, should update messaging.
 
