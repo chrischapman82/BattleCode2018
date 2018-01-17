@@ -4,6 +4,7 @@ public class Research {
 
 
     public static int rocketAvailableRound;
+    public static int knightBuildRound;
 
 
     public static void init() {
@@ -21,6 +22,7 @@ public class Research {
         Player.gc.queueResearch(UnitType.Worker);
 
         rocketAvailableRound = 450;
+        knightBuildRound = 175;
 
     }
 

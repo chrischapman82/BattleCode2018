@@ -192,7 +192,15 @@ public class AttackingBot extends Bot{
             // hacky fix atm for Rangers not being able to attack if an enemy is in meelee range
             if (unit.unitType() == UnitType.Ranger) {   // TODO: FIX
 
+                // try to attack priority enemy units if available
+                if ((enemy = choosePriorityEnemy(unit, enemies)) != null) {
+                    if (tryAttack(id, enemy.id())) {
+                        return true;
+                    }
+                }
+                // next tries to attack the lowest hp enemy
                 // Tries to attack the lowest hp enemy!
+
                 if (tryAttack(id, chooseLowestHpEnemy(enemies).id())) {
                     return true;
                 }
@@ -204,9 +212,14 @@ public class AttackingBot extends Bot{
                 }
                 return false;
             }
+
+            // first check if there is a priority enemy, eg. a mage.
+            if ((enemy = choosePriorityEnemy(unit, enemies))!=null) {
+                return tryAttack(id, enemy.id());
+            }
+
             enemy = chooseLowestHpEnemy(enemies);
-            int enemy_id = enemy.id();
-            return (tryAttack(id, enemy_id));
+            return (tryAttack(id, enemy.id()));
         }
         return false;
     }
@@ -240,25 +253,6 @@ public class AttackingBot extends Bot{
             return true;
         }
         return false;
-    }
-
-
-
-    /* Choosing certain enemies
-     */
-
-    // checks for priority enemies that have been marked
-    // will return null if no priority enemies are there
-    public static Unit choosePriorityEnemy(Unit unit, VecUnit enemies) {
-
-        Unit enemy;
-        for (int i=0; i<enemies.size(); i++) {
-            enemy = enemies.get(i);
-            if (Globals.priorityEnemies.contains(enemy)) {
-                return enemy;
-            }
-        }
-        return null;
     }
 
 

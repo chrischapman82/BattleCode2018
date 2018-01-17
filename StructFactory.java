@@ -37,12 +37,21 @@ public class StructFactory extends Structure{
             return false;
         }
 
+        if (Player.gc.karbonite() < 100 && Player.gc.round() > Research.rocketAvailableRound) {
+            return false;
+        }
+
         // if we have no workers, make some
         if (Player.gc.karbonite() >= 25 && Globals.getNumUnitsOfType(UnitType.Worker) == 0) {
             return produceRobot(factory_id, UnitType.Worker);
         }
 
-
+        // mix in a few knights here and there
+        if (Player.gc.round() > Research.knightBuildRound) {
+            if (Globals.getNumUnitsOfType(UnitType.Knight) < Globals.getNumUnitsOfType(UnitType.Ranger)/2) {
+                return produceRobot(factory_id, UnitType.Knight);
+            }
+        }
         return produceRobot(factory_id, UnitType.Ranger);
     }
 

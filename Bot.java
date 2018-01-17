@@ -153,6 +153,24 @@ public class Bot extends Unit {
         return true;
     }
 
+
+     /* Choosing certain enemies
+     */
+
+    // checks for priority enemies that have been marked
+    // will return null if no priority enemies are there
+    public static Unit choosePriorityEnemy(Unit unit, VecUnit enemies) {
+
+        Unit enemy;
+        for (int i=0; i<enemies.size(); i++) {
+            enemy = enemies.get(i);
+            if (Globals.priorityEnemies.contains(enemy)) {
+                return enemy;
+            }
+        }
+        return null;
+    }
+
     public static Unit chooseClosestAttackableEnemy(Unit unit, VecUnit enemies) {
 
         if (enemies.size() == 0) {

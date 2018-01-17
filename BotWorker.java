@@ -1,5 +1,7 @@
 import bc.*;
 
+import java.util.ArrayList;
+
 public class BotWorker extends Bot{
 
       /*
@@ -17,6 +19,8 @@ public class BotWorker extends Bot{
       public static int PATIENCE = 20;          //basically 4 turns. Patience/num_workers.
       public static int turns_waited = 0;
 
+      public static ArrayList<MapLocation> building_blueprint_locs = new ArrayList<>();
+
 
     public static void update(Unit unit) {
 
@@ -28,10 +32,6 @@ public class BotWorker extends Bot{
 
         // 1. Checks if should any blueprints can be built nearby. Builds them if yes
         if (tryToBuild(unit)) {
-            return;
-        }
-
-        if (doRocketStuff(unit)) {
             return;
         }
 
@@ -50,6 +50,10 @@ public class BotWorker extends Bot{
             return;
         }
         if (tryToCreateBuilding(id, UnitType.Rocket)) {
+            return;
+        }
+
+        if (doRocketStuff(unit)) {
             return;
         }
 
@@ -149,6 +153,7 @@ public class BotWorker extends Bot{
                 Player.gc.blueprint(id, building, dir);
                 // adds the loc to our map. means that if a rocket dies, I can't really tell
 
+                building_blueprint_locs.add(loc.add(dir));
                 Globals.countUnit(building);
 
                 turns_waited = 0;
@@ -284,16 +289,46 @@ public class BotWorker extends Bot{
             return false;
         }
 
-        // Checks if the things nearby are buildable
-        for (int i=0; i<nearby.size(); i++) {
-            Unit other = nearby.get(i);
+        // check if there's a nearby building that can be built
+        MapLocation building_loc = null;
+        MapLocation curr_loc;
+        MapLocation builder_loc = unit.location().mapLocation();
+        for (int i=0; i<building_blueprint_locs.size(); i++) {
+            curr_loc = building_blueprint_locs.get(i);
+            if (curr_loc.distanceSquaredTo(builder_loc) <= 5) {
+                building_loc = curr_loc;
+                break;
+            }
+        }
 
-            // Checks if something repairable is next to the worker
-            if (Player.gc.canBuild(unit.id(), other.id())) {
-                Player.gc.build(unit.id(), other.id());
-                //unit_finished = true;
+        // checks if a nearby building was found
+        if (building_loc == null) {
+            return false;
+        }
+
+        // just checking that there's actually stuff there.
+        if (!Player.gc.canSenseLocation(building_loc)) {
+            return false;
+        }
+
+        // if the building is finished, get rid of it from the array
+        Unit building = Player.gc.senseUnitAtLocation(building_loc);
+        if (building.structureIsBuilt() == 1) {
+            building_blueprint_locs.remove(building_loc);
+            return false;
+        }
+
+        // Checking if can build
+        if (unit.location().mapLocation().isAdjacentTo(building_loc)) {
+            System.out.println("Is adjacent");
+
+            if (Player.gc.canBuild(unit.id(), building.id())) {
+                Player.gc.build(unit.id(), building.id());
                 return true;
             }
+        } else  {
+            Nav.moveTo(unit.id(), building_loc);
+            return true;
         }
         return false;
     }
