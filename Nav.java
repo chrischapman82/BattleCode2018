@@ -113,6 +113,11 @@ public class Nav {
     // The unit knows which way it's being pushed.
     public static boolean politelyAskToMove(Unit ally_unit, Direction dir) {
 
+        // checks if the unit is a type that can move
+        if (!Bot.isMoveableBot(ally_unit.unitType())) {
+            return false;
+        }
+
         if (tryMakeWay(ally_unit.id(), dir)) {
             return true;
         }
@@ -176,7 +181,7 @@ public class Nav {
                 pushedTimes++;
                 return tryMoveForward(unit.id(), dir);
             }
-        } else if (tryMoveForward(unit.id(), dir)) {
+        } else if (trySoftMoveInDirection(unit.id(), dir)) {
             pushedTimes = 0;
             return true;
         }
@@ -277,6 +282,31 @@ public class Nav {
         }
 
         return false;*/
+    }
+
+    public static boolean trySoftMoveInDirection(int id, Direction dir) {
+        if (Player.gc.unit(id).movementHeat() >= 10) {
+            return false;
+        }
+
+        if (Player.gc.canMove(id, dir)) {
+            Player.gc.moveRobot(id, dir);
+            return true;
+        }
+
+        // try going left-centre
+        dir = bc.bcDirectionRotateLeft(dir);
+        if (tryMoveForward(id, dir)) {
+            return true;
+        }
+
+        // try going right-centre
+        dir = bc.bcDirectionRotateRight(dir);
+        if (tryMoveForward(id, dir)) {
+            return true;
+        }
+
+        return false;
     }
 
     // try hard to move through
@@ -490,5 +520,6 @@ public class Nav {
     public static MapLocation getMapLocFromId(int id) {
         return Player.gc.unit(id).location().mapLocation();
     }
+
 
 }
