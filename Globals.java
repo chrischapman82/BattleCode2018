@@ -49,7 +49,7 @@ public class Globals {
     public static boolean makeKnights = false;
 
     //public static ArrayList<Boolean> karboniteMap;
-    public static ArrayList<MapLocation> karboniteMap;
+    public static ArrayList<Integer> karboniteMap;
     public static boolean karbonite_left = true;
 
     public static ArrayList<Unit> priorityEnemies;
@@ -76,7 +76,7 @@ public class Globals {
         planet_size = planet_height*planet_width;
 
         // init the karbonite map
-        karboniteMap = Map.createKarboniteLocMap(planet);
+
         //System.out.println("*****");
         //System.out.println(planet.initialKarboniteAt(new MapLocation(Planet.Earth,0,8)));
 
@@ -96,6 +96,7 @@ public class Globals {
         // time to init bfs:
         if (Player.gc.planet() == Planet.Earth) {
             Nav.initNavDirections(enemy_init_loc);
+            Map.init_maps(planet);
         } else {
             //Nav.initNavDirections(new MapLocation(Planet.Mars, 1, 1));
         }
@@ -116,6 +117,10 @@ public class Globals {
 
         // 2 factories seems dope
         req_units.set(FACTORY_INDEX, 2);
+
+
+        // probably just 4 rockets is enough
+        req_units.set(ROCKET_INDEX, 4);
 
     }
 
