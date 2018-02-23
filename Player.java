@@ -33,7 +33,7 @@ public class Player {
         //TODO: Identify choke point
 
         while (true) {
-            //system.out.println("Current round: "+gc.round());
+            System.out.println("Current round: " + gc.round());
             Debug.getTimeLeft();    // gets teh time left
             // VecUnit is a class that you can think of as similar to ArrayList<Unit>, but immutable.
             VecUnit units = gc.myUnits();
@@ -52,7 +52,7 @@ public class Player {
                     Globals.countUnit(unit_type);
 
                     // if the unit is garrisoned or in a rocket. Do nothing as it can't do anything.
-                    if (unit.location().isInGarrison()) {
+                    if (unit.location().isInGarrison() || unit.location().isInSpace()) {
                         //System.out.println("Is garrisoned, do nothing");
                         continue;
                     }
@@ -118,6 +118,9 @@ public class Player {
         docker stop $(docker ps -a -q)
         docker rm $(docker ps -a -q)
         docker ps -as
+        docker stop $(docker ps -q) docker container rm $(docker container ls -aq) docker volume rm $(docker volume ls -q)$ docker volume prune
+
+
         */
     }
 }
