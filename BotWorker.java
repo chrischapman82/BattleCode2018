@@ -20,6 +20,8 @@ public class BotWorker extends Bot{
       public static int turns_waited = 0;
 
       public static ArrayList<MapLocation> building_blueprint_locs = new ArrayList<>();
+      public static ArrayList<Integer> KarboniteSpots;
+
 
 
     public static void update(Unit unit) {
@@ -27,8 +29,6 @@ public class BotWorker extends Bot{
         // TODO: if being attacked. Send a message and stuff
         // TODO: Gathering Karbonite
         int id = unit.id();
-
-
 
         // 1. Checks if should any blueprints can be built nearby. Builds them if yes
         if (tryToBuild(unit)) {
@@ -58,13 +58,18 @@ public class BotWorker extends Bot{
         }
 
         // 4. Tries to mine
-        if (tryToMine(id)) {
+        //if (tryToMine(id)) {
+            //return;
+        //}
+
+        if (findKarbonite(unit)) {
             return;
         }
 
         // TODO: Find Karbonite
+        //Nav.moveToEnemyBase(id);
         Nav.wander(id);
-        //findKarbonite(unit);
+
         return;
     }
 
@@ -87,7 +92,8 @@ public class BotWorker extends Bot{
 
             // for rockets
             // build whenever I've made the rocket available
-        } else if (building.equals(UnitType.Rocket) && Player.gc.round() < Research.rocketAvailableRound) { //&& Globals.prev_rockets >= Globals.req_rockets){
+        } else if (building.equals(UnitType.Rocket) && Player.gc.round() < Research.rocketAvailableRound &&
+                Globals.getNumUnitsOfType(building) >= Globals.getReqUnitsOfType(building)) { //&& Globals.prev_rockets >= Globals.req_rockets){
             return false;
         }
 
@@ -168,15 +174,45 @@ public class BotWorker extends Bot{
     }
 
 
-    public static void findKarbonite(Unit unit) {
+    public static boolean findKarbonite(Unit unit) {
 
+        if (Globals.planet_name == Planet.Mars) {
+            // not sure yet!
+            return false;
+        }
 
+        if (!Map.isKarboniteLeft) {
+            System.out.println("No karbonite left!");
+            // there's no karbonite left. Do nothing
+            return false;
+        }
+
+        // goes towards the closest karbonite
+
+        MapLocation closest_karbonite = Map.getClosestKarbonite(unit.location().mapLocation());
+        System.out.println(closest_karbonite);
+        if (closest_karbonite.isAdjacentTo(unit.location().mapLocation())) {
+            tryToMine(unit.id(), closest_karbonite);
+            return true;
+        }
+        Nav.tryMoveDirAndPushAlly(unit, Nav.dirToMapLoc(unit, closest_karbonite));
+        return true;
         // I'd really like to do a BFS around me.
+    }
+
+    public static boolean tryToMine(int id, MapLocation mineLoc) {
+        Direction cand_dir = Nav.getMapLocFromId(id).directionTo(mineLoc);
+        if (Player.gc.canHarvest(id, cand_dir)) {
+            Player.gc.harvest(id, cand_dir);
+            return true;
+        }
+        return false;
     }
 
     // TODO: Find Karbonite, rather than just wandering w/out purpose
     // Only valid on Earth
     // TODO WTF
+    /*
     public static void findKarbonite2(Unit unit) {
 
         //System.out.println(Globals.karboniteMap);
@@ -239,9 +275,9 @@ public class BotWorker extends Bot{
                 }
             }
             num_reps++;
-        }*/
+        }
 
-    }
+    }*/
 
 
     // Checks if has the money or energy to replicate
@@ -281,13 +317,6 @@ public class BotWorker extends Bot{
         if (Globals.planet_name.equals(Planet.Mars)) {
             return false;
         }
-        // checks right next to the player
-        VecUnit nearby = Player.gc.senseNearbyUnits(unit.location().mapLocation(), 5);
-
-        // nothing nearby. Exit
-        if (nearby.size() == 0) {
-            return false;
-        }
 
         // check if there's a nearby building that can be built
         MapLocation building_loc = null;
@@ -295,25 +324,27 @@ public class BotWorker extends Bot{
         MapLocation builder_loc = unit.location().mapLocation();
         for (int i=0; i<building_blueprint_locs.size(); i++) {
             curr_loc = building_blueprint_locs.get(i);
-            if (curr_loc.distanceSquaredTo(builder_loc) <= 5) {
+            if (curr_loc.distanceSquaredTo(builder_loc) <= 8) {
                 building_loc = curr_loc;
                 break;
             }
         }
 
-        // checks if a nearby building was found
+        // Doesn't build if there was no nearby buildings found
         if (building_loc == null) {
             return false;
         }
 
         // just checking that there's actually stuff there.
-        if (!Player.gc.canSenseLocation(building_loc)) {
+        if (!Player.gc.hasUnitAtLocation(building_loc)) {
             return false;
         }
 
         // if the building is finished, get rid of it from the array
         Unit building = Player.gc.senseUnitAtLocation(building_loc);
+
         if (building.structureIsBuilt() == 1) {
+            System.out.println("Structure built!");
             building_blueprint_locs.remove(building_loc);
             return false;
         }
@@ -327,7 +358,7 @@ public class BotWorker extends Bot{
                 return true;
             }
         } else  {
-            Nav.moveTo(unit.id(), building_loc);
+            Nav.trySoftMoveInDirection(unit.id(), unit.location().mapLocation().directionTo(building.location().mapLocation()));
             return true;
         }
         return false;
@@ -337,12 +368,14 @@ public class BotWorker extends Bot{
     public static boolean tryToMine(int id) {
         //System.out.println("Trying to mine");
         //checks if any ore next to the worker:
+        System.out.println("Trying to mine!");
         Direction candidate_dir = Player.getRandomDir();
         for (int i = 0; i < Globals.NUM_DIRECTIONS; i++) {
             candidate_dir = bc.bcDirectionRotateLeft(candidate_dir);
             if (Player.gc.canHarvest(id, candidate_dir)) {
                 Player.gc.harvest(id, candidate_dir);
-                Globals.karboniteMap.remove(Nav.getMapLocFromId(id).add(candidate_dir));          // remove doesn't error if not in there!
+                Map.removeKarboniteFromMap(Nav.getMapLocFromId(id).add(candidate_dir));
+                //Globals.karboniteMap.remove(Nav.getMapLocFromId(id).add(candidate_dir));          // remove doesn't error if not in there!
                 //System.out.println(Nav.getMapLocFromId(id).add(candidate_dir));
                 //System.out.println(Globals.karboniteMap.contains(Nav.getMapLocFromId(id).add(candidate_dir)));
                 //System.out.println("Mining...");
