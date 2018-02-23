@@ -17,10 +17,34 @@ public class BotRanger extends AttackingBot {
                 markUnit(enemy);
             }
         }
-        AttackingBot.update(unit);
 
+        if (attack(unit, getAttackableEnemies(unit))) {
+
+        }
+
+        if (engage(unit, viewable_enemies)) {
+            return;
+        }
+
+        Nav.moveToEnemyBase(unit.id());
+        return;
         // focus fire is good, so always have at least 1 enemy stored
+    }
 
+    public static boolean engage(Unit unit, VecUnit enemies) {
+
+        int id = unit.id();
+
+        if ((enemies.size() > 0)) {
+            Unit enemy = chooseClosestEnemy(unit, enemies);
+
+            // go towards the enemy and try to attack the closest enemy hopefully
+            Nav.tryGoToMapLocation(id, enemy.location().mapLocation());
+            tryAttack(id, enemy.id());      // could use attack - but might be too expensive
+
+            return true;
+        }
+        return false;
     }
 
     // TODO: try to micro
