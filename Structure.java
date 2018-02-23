@@ -1,6 +1,9 @@
 import bc.*;
 
 public class Structure extends Unit {
+    /*  Contains generic methods for structures.
+        ie. Rockets and Factories!
+     */
 
     public static final int MAX_GARRISON_UNITS = 8;
 
