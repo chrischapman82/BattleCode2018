@@ -1,6 +1,10 @@
 public class Debug {
 
+    /* Contains debugging methods!
+
+     */
     // I'd like to use these if they get some visual stuff
+    // unfortunately was never implemented by devs
     public static void indicateDot(){
 
     }
