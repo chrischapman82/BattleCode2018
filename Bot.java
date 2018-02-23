@@ -63,6 +63,17 @@ public class Bot extends Unit {
         }
     }
 
+    public static boolean isMoveableBot(UnitType unit_type) {
+        switch (unit_type) {
+            case Factory:
+                return false;
+            case Rocket:
+                return false;
+            default:
+                return true;
+        }
+    }
+
     /* TODO: Hopefully will be better with new api. Otherwise have to create new array list and add to that
     public static VecUnit getViewableEnemiesOfType(Unit unit, UnitType unit_type) {
         VecUnit enemies = getViewableEnemies(unit);
@@ -104,18 +115,15 @@ public class Bot extends Unit {
 
     public static boolean doRocketStuff(Unit unit) {
 
-        // No need to do this on mars
-        if (Globals.planet_name.equals(Planet.Mars)) {
-            return false;
-        }
-
-        if (Player.gc.round() < Research.rocketAvailableRound) {
+        // No need to do this on mars or if it's before rockets are even being made
+        if (Globals.planet_name.equals(Planet.Mars) || Player.gc.round() < (Research.rocketAvailableRound+10)) {
             return false;
         }
 
        // System.out.println("Curr spots earth size");
        // System.out.println(StructRocket.curr_rocket_spots_earth.size());
         if (StructRocket.curr_rocket_spots_earth.size() == 0) {
+            System.out.println("No rockets on earth");
             return false;
         }
 
@@ -135,7 +143,9 @@ public class Bot extends Unit {
 
         if (unit_loc.isAdjacentTo(closest_rocket)) {
             //System.out.println("Is adjacent");
-
+            if (!Player.gc.hasUnitAtLocation(closest_rocket)) {
+                return false;
+            }
             Unit rocket = Player.gc.senseUnitAtLocation(closest_rocket);
             //System.out.println(Player.gc.canLoad(rocket.id(), unit.id()));
             if (Player.gc.canLoad(rocket.id(), unit.id())) {
@@ -149,7 +159,7 @@ public class Bot extends Unit {
         //System.out.println(closest_rocket);
 
         // move to the first rocket loc
-        Nav.moveTo(unit.id(), closest_rocket);
+        Nav.trySoftMoveInDirection(unit.id(), Nav.dirToMapLoc(unit, closest_rocket));
         return true;
     }
 
