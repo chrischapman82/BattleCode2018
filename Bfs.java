@@ -26,7 +26,7 @@ public class Bfs {
 
         /*init*/
         Queue<MapLocation> queue = new LinkedList<>();
-        queue.add(end);                 // Q containing all endings
+            queue.add(end);                 // Q containing all endings
         dirFrom = new ArrayList<>();    // direction list
 
         // setting all initial direction to null
