@@ -15,6 +15,7 @@ public class Player {
     // The game controller, basically called for everything. Means that I have to constantly call player but whatever I guess
     public static GameController gc;
 
+
     public static void main(String[] args) {
 
         // Connect to the manager, starting the game
