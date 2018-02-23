@@ -18,8 +18,6 @@ public class AttackingBot extends Bot{
         boolean out_numbered = isOutnumbered(unit, viewable_enemies);
 
         // if i have no mates
-
-
         // for loading into rockets
 
         int nearby_attacking_allies = 0;
@@ -44,10 +42,7 @@ public class AttackingBot extends Bot{
 
 
         // Always attack first, no point in not if can(unless mage)
-
         // if should atk, DO!
-
-
 
         if (attack(unit, attackable_enemies)) {
 
@@ -272,6 +267,5 @@ public class AttackingBot extends Bot{
         }
         return priority_enemy;
     }
-
 
 }
