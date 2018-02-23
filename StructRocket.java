@@ -45,7 +45,7 @@ public class StructRocket extends Structure {
     // logic for rocket
     public static void update(Unit rocket) {
 
-        // For mars, just unload garison
+        // For mars, just unload garrison
         if (Globals.planet_name.equals(Planet.Mars)) {
             releaseGarrisonUnits(rocket);
             return;
@@ -72,7 +72,15 @@ public class StructRocket extends Structure {
         // get the given landing loc
         MapLocation cand_landingLoc = landingLocs.get(landingLocsCurrIndex);
         if (shouldLaunch(rocket, cand_landingLoc)) {
-            curr_rocket_spots_earth.remove(rocket.location().mapLocation());    // remove off of earth
+
+            // add landing spot to mars and remove the current spot from earth
+            MapLocation earth_loc = rocket.location().mapLocation();
+            // if there's for some reason a blueprint loc, remove that
+            if (BotWorker.building_blueprint_locs.contains(earth_loc)) {
+                BotWorker.building_blueprint_locs.remove(earth_loc);
+            }
+            curr_rocket_spots_mars.add(cand_landingLoc);
+            curr_rocket_spots_earth.remove(earth_loc);    // remove off of earth
             Player.gc.launchRocket(rocket.id(), cand_landingLoc);
         }
     }
