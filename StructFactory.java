@@ -41,6 +41,9 @@ public class StructFactory extends Structure{
             return false;
         }
 
+        return produceRobot(factory_id, UnitType.Ranger);
+
+        /*
         // if we have no workers, make some
         if (Player.gc.karbonite() >= 25 && Globals.getNumUnitsOfType(UnitType.Worker) == 0) {
             return produceRobot(factory_id, UnitType.Worker);
@@ -48,11 +51,12 @@ public class StructFactory extends Structure{
 
         // mix in a few knights here and there
         if (Player.gc.round() > Research.knightBuildRound) {
-            if (Globals.getNumUnitsOfType(UnitType.Knight) < Globals.getNumUnitsOfType(UnitType.Ranger)/2) {
+            if (Globals.getNumUnitsOfType(UnitType.Knight) < Globals.getNumUnitsOfType(UnitType.Ranger)/4) {
                 return produceRobot(factory_id, UnitType.Knight);
             }
         }
         return produceRobot(factory_id, UnitType.Ranger);
+        */
     }
 
     //Produce a unit if it's possible
