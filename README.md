@@ -1,5 +1,5 @@
 # BattleCode2018
-Battle Code 2018 submission under AllDayFanclub
+Submission under AllDayFanclub for battlecode, an annual MIT competition.
 
 A bot I created for the BattleCode2018 competition. Hosted annually by MIT to fight for a chance at $50,000 in prizes.
 
